@@ -27,10 +27,11 @@ angular.module('app').factory('ShipFactory', function($rootScope, GameService) {
   Ship.prototype = Object.create(Phaser.Sprite.prototype);
   Ship.prototype.constructor = Ship;
 
-  Ship.prototype.pulse = function() { 
+  Ship.prototype.pulse = function() {
+
     if(game.time.now > this.pulseTime) {
-      this.body.velocity.x += Math.sin(this.rotation);
-      this.body.velocity.y += -Math.cos(this.rotation);
+      this.body.velocity.x += Math.sin(this.rotation) * GameService.getStat('shipAcceleration');
+      this.body.velocity.y += -Math.cos(this.rotation)* GameService.getStat('shipAcceleration');
     }
   }  
 
