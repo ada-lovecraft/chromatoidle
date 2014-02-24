@@ -1,0 +1,24 @@
+.row
+  .col-md-3
+    .row
+      .col-md-12 Max Asteroids: {{stats.maxAsteroids}}
+    .row
+      .col-md-12 Money: {{stats.money}}
+    .row(ng-show="showMoreBulletUpgrades") 
+      .col-md-2 
+        h5 More Bullets
+        button.btn.btn-primary(type="button", ng-click="purchaseMoreBullets(10,1)", popover="More Bullets", popover-trigger="mouseenter", ng-disabled="stats.money < 10") 1
+    .row(ng-show="showFasterBulletUpgrades") 
+      .col-md-2
+        h5 Faster Bullets
+        button.btn.btn-primary(type="button", ng-click="purchaseFasterBullets(10,1)", popover="Faster Bullets", popover-trigger="mouseenter", ng-disabled="stats.money < 10") 1
+    .row(ng-show="showShipRepairs") 
+      .col-md-2
+        h5 Ship Repairs
+        button.btn.btn-primary(type="button", ng-click="purchaseShipRepairs(20,1)", popover="Fix Thrusters", popover-trigger="mouseenter", ng-disabled="stats.money < 20") 1
+    .row(ng-show="showAsteroidUpgrades") 
+      .col-md-2
+        h5 Asteroids
+        button.btn.btn-primary(type="button", ng-click="purchaseAsteroidUpgrades(25,1)", popover="Fix Thrusters", popover-trigger="mouseenter", ng-disabled="stats.money < 25") 1
+  .col-md-9
+    .game#asteroidle-game
