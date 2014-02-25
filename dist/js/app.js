@@ -171,6 +171,7 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
     
     this.movementTween = game.add.tween(this);
     this.alphaTween = game.add.tween(this);
+    this.targetable = false;
 
     this.shrinkTween = game.add.tween(this.scale);
     this.name = 'asteroid-' + nameCounter;
@@ -180,6 +181,9 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
 
     this.movementTween.to({x: targetX, y: targetY},2000, Phaser.Easing.Cubic.Out);
     this.movementTween.start();
+    this.movementTween.onComplete.add(function() {
+      this.targetable = true;
+    }, this);
     this.alphaTween.to({alpha:0.5}, 500, Phaser.Easing.Cubic.Out);
 
     this.miningText = game.add.bitmapText(this.x, this.y, '+1', {font: '16px minecraftia', align: 'center'});
@@ -367,7 +371,7 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
       if(closest.asteroid.obj ) {
         this.target.obj = null;
         this.rotation = game.physics.angleBetween(this, closest.asteroid.obj);
-        if (closest.asteroid.distance <= GameService.getStat('miningRange')) {
+        if (closest.asteroid.distance <= GameService.getStat('miningRange') && closest.asteroid.targetable) {
           
           this.body.velocity.x = 0;
           this.body.velocity.y = 0;
@@ -559,7 +563,6 @@ angular.module('app').factory('UpgradeService', function($log, $rootScope,$timeo
     purchaseUpgrade: function(upgrade, level) {
       upgrades[upgrade].levels[level].purchased = true;
       console.debug('purchasing upgrade:', upgrade, level);
-      debugger
       GameService.setStat(upgrades[upgrade].stat, level, upgrades[upgrade].levels[level].value);
       GameService.modifyMoney(-upgrades[upgrade].levels[level].cost);
     },

@@ -116,7 +116,6 @@ angular.module('app').factory('UpgradeService', function($log, $rootScope,$timeo
     purchaseUpgrade: function(upgrade, level) {
       upgrades[upgrade].levels[level].purchased = true;
       console.debug('purchasing upgrade:', upgrade, level);
-      debugger
       GameService.setStat(upgrades[upgrade].stat, level, upgrades[upgrade].levels[level].value);
       GameService.modifyMoney(-upgrades[upgrade].levels[level].cost);
     },

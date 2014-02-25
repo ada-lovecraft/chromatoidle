@@ -64,7 +64,7 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
       if(closest.asteroid.obj ) {
         this.target.obj = null;
         this.rotation = game.physics.angleBetween(this, closest.asteroid.obj);
-        if (closest.asteroid.distance <= GameService.getStat('miningRange')) {
+        if (closest.asteroid.distance <= GameService.getStat('miningRange') && closest.asteroid.targetable) {
           
           this.body.velocity.x = 0;
           this.body.velocity.y = 0;

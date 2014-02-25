@@ -39,6 +39,7 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
     
     this.movementTween = game.add.tween(this);
     this.alphaTween = game.add.tween(this);
+    this.targetable = false;
 
     this.shrinkTween = game.add.tween(this.scale);
     this.name = 'asteroid-' + nameCounter;
@@ -48,6 +49,9 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
 
     this.movementTween.to({x: targetX, y: targetY},2000, Phaser.Easing.Cubic.Out);
     this.movementTween.start();
+    this.movementTween.onComplete.add(function() {
+      this.targetable = true;
+    }, this);
     this.alphaTween.to({alpha:0.5}, 500, Phaser.Easing.Cubic.Out);
 
     this.miningText = game.add.bitmapText(this.x, this.y, '+1', {font: '16px minecraftia', align: 'center'});
