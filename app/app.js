@@ -1,3 +1,4 @@
+window.requestAnimationFrame = null;
 var app = angular.module('app',['ui.bootstrap','ui','views','ngRoute','LocalStorageModule']);
 
 app.config(function($routeProvider) {

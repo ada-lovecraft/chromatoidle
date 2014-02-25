@@ -45,7 +45,7 @@ angular.module('app').factory('UpgradeService', function($log, $rootScope,$timeo
     },
     asteroids: {
       label: 'More Asteroids',
-      stat: 'maxAsteroids',
+      stat: 'asteroids',
       levels: [
         { cost: 0, value: 1 },
         { cost: 10, value: 2 },

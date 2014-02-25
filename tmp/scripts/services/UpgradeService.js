@@ -45,7 +45,7 @@ angular.module('app').factory('UpgradeService', function($log, $rootScope,$timeo
     },
     asteroids: {
       label: 'More Asteroids',
-      stat: 'maxAsteroids',
+      stat: 'asteroids',
       levels: [
         { cost: 0, value: 1 },
         { cost: 10, value: 2 },
@@ -116,6 +116,7 @@ angular.module('app').factory('UpgradeService', function($log, $rootScope,$timeo
     purchaseUpgrade: function(upgrade, level) {
       upgrades[upgrade].levels[level].purchased = true;
       console.debug('purchasing upgrade:', upgrade, level);
+      debugger
       GameService.setStat(upgrades[upgrade].stat, level, upgrades[upgrade].levels[level].value);
       GameService.modifyMoney(-upgrades[upgrade].levels[level].cost);
     },
