@@ -1,3 +1,4 @@
+'use strict';
 angular.module('app').service('GameService', function($log, $rootScope,$timeout, $controller) {
   var game = null;
   var stats = {};
@@ -6,17 +7,17 @@ angular.module('app').service('GameService', function($log, $rootScope,$timeout,
   return {
     get: function() {
       if(!game) {
-        throw 'game not instantiated. You must call GameService.init(\'dom id\') first;'
+        throw 'game not instantiated. You must call GameService.init(\'dom id\') first;';
       }
       return game;
     },
     init: function(selector) {
-      game = new Phaser.Game(800, 600, Phaser.CANVAS, selector);
+      game = new Phaser.Game(800, 600, Phaser.AUTO, selector);
       $log.debug('game instantiated:', game);
     },
     addState: function(stateName, controllerName, scope) {
-      var scope = scope.$new();
-      var controller = $controller(controllerName, {$scope: scope});
+      var newScope = scope.$new();
+      var controller = $controller(controllerName, {$scope: newScope});
       game.state.add(stateName, controller);
     },
     switchState: function(stateName) {
@@ -26,21 +27,38 @@ angular.module('app').service('GameService', function($log, $rootScope,$timeout,
       return stats;
     },
     getStat: function(stat) {
-      return stats[stat];
+      return stats[stat].value;
     },
-    updateStats: function(newStats) {
-      $timeout(function() {
-        angular.extend(stats, newStats);  
-      }, 0);
+    setStat: function(stat, level, value) {
+      stats[stat] = {
+        level: level,
+        value: value
+      };
+
+      if(stats.asteroids && stats.miners && stats.globalScale && stats.asteroids.value + stats.miners.value % 5 === 0) {
+        stats.globalScale.level = 0;
+        stats.globalScale.value = stats.globalScale.value * 0.66;
+      }
     },
-    increaseMoney: function(amount) {
-      stats.money += amount;
+    modifyMoney: function(amount) {
+      amount = amount || 1;
+      stats.money.value += amount;
       if(amount > 0) {
-        if(stats.totalMoney)
-          stats.totalMoney += amount;
-        else
-          stats.totalMoney = amount;
+        if(stats.totalMoney) {
+          stats.totalMoney.value += amount;
+        } else {
+          stats.totalMoney = { value: amount};
+        }
+      }
+    },
+    modifyStat: function(stat, amount) {
+      amount = amount || 1;
+      stats[stat].level = 0;
+      stats[stat].value += amount;
+      if(stats.asteroids.value + stats.miners.value % 5 === 0) {
+        stats.globalScale.level = 0;
+        stats.globalScale.value = stats.globalScale.value * 0.66;
       }
     }
-  }
+  };
 });

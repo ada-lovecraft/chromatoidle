@@ -1,24 +1,18 @@
 .row
   .col-md-3
     .row
-      .col-md-12 Max Asteroids: {{stats.maxAsteroids}}
-    .row
-      .col-md-12 Money: {{stats.money}}
-    .row(ng-show="showMoreBulletUpgrades") 
-      .col-md-2 
-        h5 More Bullets
-        button.btn.btn-primary(type="button", ng-click="purchaseMoreBullets(10,1)", popover="More Bullets", popover-trigger="mouseenter", ng-disabled="stats.money < 10") 1
-    .row(ng-show="showFasterBulletUpgrades") 
-      .col-md-2
-        h5 Faster Bullets
-        button.btn.btn-primary(type="button", ng-click="purchaseFasterBullets(10,1)", popover="Faster Bullets", popover-trigger="mouseenter", ng-disabled="stats.money < 10") 1
-    .row(ng-show="showShipRepairs") 
-      .col-md-2
-        h5 Ship Repairs
-        button.btn.btn-primary(type="button", ng-click="purchaseShipRepairs(20,1)", popover="Fix Thrusters", popover-trigger="mouseenter", ng-disabled="stats.money < 20") 1
-    .row(ng-show="showAsteroidUpgrades") 
-      .col-md-2
-        h5 Asteroids
-        button.btn.btn-primary(type="button", ng-click="purchaseAsteroidUpgrades(25,1)", popover="Fix Thrusters", popover-trigger="mouseenter", ng-disabled="stats.money < 25") 1
+      .col-md-12 Money: {{stats.money.value}}
+    h4 Upgrades
+    .row(ng-repeat="(upgradeKey, upgrade) in upgrades")
+      .col-md-12
+        h5 {{upgrade.label}}
+        .col-md-1(ng-repeat="(levelNumber, level) in upgrade.levels")        
+          button.btn.btn-primary.btn-xs(type="button", ng-click="purchaseUpgrade(upgradeKey,levelNumber)", ng-disabled="stats.money.value < level.cost || stats[upgradeKey] <= levelNumber", ng-hide="levelNumber == 0") {{levelNumber}}
+    h4 Purchasables
+    .row(ng-repeat="item in purchasables")
+      .col-md-12
+        h5 {{item.label}}
+        button.btn.btn-primary.btn-xs(type="button", ng-click="purchaseItem(item.stat)", ng-disabled="stats.money.value < item.cost") +
+    
   .col-md-9
     .game#asteroidle-game

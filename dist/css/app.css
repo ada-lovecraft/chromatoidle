@@ -18432,3 +18432,6 @@ button.close {
   content: "\f196";
 }
 
+.cursor-wait {
+  cursor: wait;
+}

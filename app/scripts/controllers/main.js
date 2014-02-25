@@ -1,95 +1,45 @@
-angular.module('app').controller('MainCtrl', function($scope, $log, $interval, GameService, localStorageService) {
-  $scope.message = "Hello, World!";
+'use strict';
+
+angular.module('app').controller('MainCtrl', function($scope, $log, $interval, GameService, UpgradeService, localStorageService) {
   $log.debug('yo');
   GameService.init('asteroidle-game');
-  var game = GameService.get();
   GameService.addState('boot', 'BootStateCtrl', $scope);
   GameService.addState('play', 'PlayStateCtrl', $scope);
   GameService.switchState('boot');
   
-  GameService.updateStats({score: 12});
   
-  $scope.stats = GameService.getStats();
+  $scope.upgrades = UpgradeService.upgrades();
+  $scope.purchasables = UpgradeService.purchasables();
+  localStorageService.clearAll();
   var stats = localStorageService.get('asteroidle-stats') || {
-    maxAsteroids: 1, 
-    bulletInterval: 500, 
-    bulletSpeed: 200, 
-    money: 0, 
-    autopilot: false,
-    pulseInterval: 100,
-    sensorRange: 50,
-    shipAcceleration: 0,
-    maxShips: 1,
-    respawnRate: 5000,
+    money: {level: 0, value: 0},
+    minerAcceleration: {level: 0, value: 0},
+    miningSpeed: {level: 0, value: 0},
+    miningRange: {level: 0, value: 0},
+    asteroids: {level: 0, value: 0},
+    asteroidValue: {level: 0, value: 0},
+    globalScale: {level:0, value: 1},
+    miners: {level: 0, value: 0}
   };
   
-  GameService.updateStats(stats);
+  UpgradeService.init(stats);
+  $scope.stats = GameService.getStats();
 
 
   $scope.$watch(GameService.getStats, function(newVal) {
-    $scope.stats = newVal;
-    $scope.updateOptions();
+    $scope.stats = newVal; 
     localStorageService.add('asteroidle-stats', newVal);
   },true);
 
-  $scope.$on('respawnCountdown', function(evt, count, max) {
-    $scope.respawn = {
-      respawning: true,
-      count: count,
-      max: max
-    };
-    console.debug('respawn:', $scope.respawn);
-  });
-  $scope.$on('respawnFinish', function(evt) {
-    $scope.respawn.respawning = false;
-  });
+  $scope.purchaseUpgrade = function(upgrade, level) {
+    UpgradeService.purchaseUpgrade(upgrade, level);
+  };
+
+  $scope.purchaseItem = function(stat) {
+    UpgradeService.purchaseItem(stat);
+  };
 
 
-  $scope.updateOptions = function() {
-    if($scope.stats.money >= 10) {
-      $scope.showMoreBulletUpgrades = true;
-      $scope.showFasterBulletUpgrades = true;
-    }
-    if($scope.stats.money >= 20) {
-      $scope.showShipRepairs = true;
-    }
-    if($scope.stats.money >= 25) {
-      $scope.showAsteroidUpgrades = true;
-    }
-  }
-
-  $scope.purchaseMoreBullets = function(amount, level) {
-    GameService.increaseMoney(-amount);
-    var bi = GameService.getStat('bulletInterval');
-    GameService.updateStats({bulletInterval: bi - 100});
-  }
-
-  $scope.purchaseFasterBullets = function(amount, level) {
-    GameService.increaseMoney(-amount);
-    var bs = GameService.getStat('bulletSpeed');
-    GameService.updateStats({bulletSpeed: bs +50});
-
-  }
-
-  $scope.purchaseShipRepairs = function(amount, level) {
-    switch(level) {
-      case 1:
-        GameService.updateStats({shipAcceleration: 10});
-        GameService.increaseMoney(-amount);
-        break;
-    }
-
-  }
-
-  $scope.purchaseAsteroidUpgrades = function(amount, level) {
-    switch(level) {
-      case 1:
-        GameService.updateStats({maxAsteroids: 2});
-        GameService.increaseMoney(-amount);
-        break;
-    }
-
-  }
 
 
 });

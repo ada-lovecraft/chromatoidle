@@ -50,7 +50,7 @@ module.exports = function(grunt) {
         files: ['app/**/*.*'],
         tasks: ['build','clean:dist'],
         options: {
-            livereload: 35729
+            livereload: 35728
         }
       },
       bower: {
@@ -64,7 +64,7 @@ module.exports = function(grunt) {
           port: 9001,
           base: './dist/',
           open: true,
-          livereload: 35729
+          livereload: 35728
         }
       }
     },
