@@ -11,9 +11,9 @@ angular.module('views', []).run(['$templateCache', function($templateCache) {
     "    <h4>Upgrades</h4>\n" +
     "    <div ng-repeat=\"(upgradeKey, upgrade) in upgrades\" class=\"row\">\n" +
     "      <div class=\"col-md-12\">\n" +
-    "        <h5>{{upgrade.label}}</h5>\n" +
+    "        <h5>{{upgrade.label}}:<small> Current Level: {{stats[upgradeKey].level}}</small></h5>\n" +
     "        <div ng-repeat=\"(levelNumber, level) in upgrade.levels\" class=\"col-md-1\">       \n" +
-    "          <button type=\"button\" ng-click=\"purchaseUpgrade(upgradeKey,levelNumber)\" ng-disabled=\"stats.money.value &lt; level.cost || stats[upgradeKey] &lt;= levelNumber\" ng-hide=\"levelNumber == 0\" class=\"btn btn-primary btn-xs\">{{levelNumber}}</button>\n" +
+    "          <button type=\"button\" ng-click=\"purchaseUpgrade(upgradeKey,levelNumber)\" ng-disabled=\"stats.money.value &lt; level.cost || stats[upgradeKey].level &lt;= levelNumber\" ng-hide=\"levelNumber == 0\" class=\"btn btn-primary btn-xs\">{{levelNumber}}</button>\n" +
     "        </div>\n" +
     "      </div>\n" +
     "    </div>\n" +

@@ -5,9 +5,10 @@
     h4 Upgrades
     .row(ng-repeat="(upgradeKey, upgrade) in upgrades")
       .col-md-12
-        h5 {{upgrade.label}}
+        h5 {{upgrade.label}}:
+          small  Current Level: {{stats[upgradeKey].level}}
         .col-md-1(ng-repeat="(levelNumber, level) in upgrade.levels")        
-          button.btn.btn-primary.btn-xs(type="button", ng-click="purchaseUpgrade(upgradeKey,levelNumber)", ng-disabled="stats.money.value < level.cost || stats[upgradeKey] <= levelNumber", ng-hide="levelNumber == 0") {{levelNumber}}
+          button.btn.btn-primary.btn-xs(type="button", ng-click="purchaseUpgrade(upgradeKey,levelNumber)", ng-disabled="stats.money.value < level.cost || stats[upgradeKey].level <= levelNumber", ng-hide="levelNumber == 0") {{levelNumber}}
     h4 Purchasables
     .row(ng-repeat="item in purchasables")
       .col-md-12

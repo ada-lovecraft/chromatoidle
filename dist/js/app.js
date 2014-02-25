@@ -56,7 +56,6 @@ angular.module('app').controller('MainCtrl', function($scope, $log, $interval, G
   
   $scope.upgrades = UpgradeService.upgrades();
   $scope.purchasables = UpgradeService.purchasables();
-  localStorageService.clearAll();
   var stats = localStorageService.get('asteroidle-stats') || {
     money: {level: 0, value: 0},
     minerAcceleration: {level: 0, value: 0},
