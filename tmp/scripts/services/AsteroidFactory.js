@@ -50,6 +50,7 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
     this.movementTween.to({x: targetX, y: targetY},2000, Phaser.Easing.Cubic.Out);
     this.movementTween.start();
     this.movementTween.onComplete.add(function() {
+      console.debug('setting targetable');
       this.targetable = true;
     }, this);
     this.alphaTween.to({alpha:0.5}, 500, Phaser.Easing.Cubic.Out);

@@ -182,6 +182,7 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
     this.movementTween.to({x: targetX, y: targetY},2000, Phaser.Easing.Cubic.Out);
     this.movementTween.start();
     this.movementTween.onComplete.add(function() {
+      console.debug('setting targetable');
       this.targetable = true;
     }, this);
     this.alphaTween.to({alpha:0.5}, 500, Phaser.Easing.Cubic.Out);
@@ -313,8 +314,8 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
   var nameCounter = 0;
   var Miner = function(x, y) {
     this.spawn = {
-      x: x || game.width/2,
-      y: y || game.height/2
+      x: x || game.world.randomX,
+      y: y || game.world.randomY
     };
     
 
@@ -369,10 +370,8 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
 
 
       if(closest.asteroid.obj ) {
-        this.target.obj = null;
         this.rotation = game.physics.angleBetween(this, closest.asteroid.obj);
-        if (closest.asteroid.distance <= GameService.getStat('miningRange') && closest.asteroid.targetable) {
-          
+        if (closest.asteroid.distance <= GameService.getStat('miningRange') && closest.asteroid.obj.targetable) {
           this.body.velocity.x = 0;
           this.body.velocity.y = 0;
           this.mining = true;
