@@ -24,6 +24,7 @@ angular.module('app').controller('BootStateCtrl', function($scope, $log, GameSer
     game.load.image('asteroid', 'img/comet-small.png');
     game.load.image('money', 'img/money.png');
     game.load.bitmapFont('minecraftia', 'fonts/minecraftia.png', 'fonts/minecraftia.xml');
+    game.load.image('laser', 'img/laser.png');
 
   };
 
@@ -96,15 +97,17 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
   console.debug('scope:', $scope);
 
   $rootScope.$on('rescale', state.rescaleAll);
-
+  $scope.livingThings = 0;
+  $scope.lastRescale = 0;
+  $scope.lastScale = 1;
   state.create = function() {
-
     $scope.asteroids = game.asteroids = game.add.group();
     $scope.miners = game.miners = game.add.group();
+    $scope.lasers = game.lasers = game.add.group();
+    $scope.lasers.createMultiple(100,'laser');
+    $scope.lasers.setAll('anchor.x',0);
+    $scope.lasers.setAll('anchor.y',0);
 
-    
-    
-    
   };
 
   state.update = function() {
@@ -118,6 +121,10 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
       var miner = new Miner();
       $scope.miners.add(miner);
     }
+
+    $scope.maxLivingThings = GameService.getStat('asteroids') + GameService.getStat('miners');
+    var newScale = (1000 - $scope.maxLivingThings) / 2000 ;
+    GameService.setStat('globalScale', 0, newScale);
   };
 
   state.render = function() {
@@ -182,14 +189,10 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
     this.movementTween.to({x: targetX, y: targetY},2000, Phaser.Easing.Cubic.Out);
     this.movementTween.start();
     this.movementTween.onComplete.add(function() {
-      console.debug('setting targetable');
       this.targetable = true;
     }, this);
     this.alphaTween.to({alpha:0.5}, 500, Phaser.Easing.Cubic.Out);
 
-    this.miningText = game.add.bitmapText(this.x, this.y, '+1', {font: '16px minecraftia', align: 'center'});
-    this.miningText.anchor.setTo(0.5, 0.5);
-    this.miningText.alpha = 0;
   };
 
   Asteroid.prototype = Object.create(Phaser.Sprite.prototype);
@@ -202,14 +205,12 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
   Asteroid.prototype.update = function() {
     var scale;
     this.angle += this.rotateSpeed;
+
     if((this.input.pointerDown(game.input.activePointer.id) || this.hasAttachedMiner) && this.alive && game.time.now >= this.miningTimer) {
       this.miningTimer = game.time.now + GameService.getStat('miningSpeed');
       GameService.modifyMoney();
       this.health--;
-      this.miningText.alpha = 1;
-      scale = this.health / this.maxHealth * GameService.getStat('globalScale');
-      this.miningText.x = this.x;
-      this.miningText.y = this.y - this.height/2;
+      scale = (this.health / this.maxHealth * GameService.getStat('globalScale'));
       game.add.tween(this.scale).to({x: scale, y: scale}, GameService.getStat('miningSpeed'), Phaser.Easing.Elastic.Out, true).onComplete.add(function() {
         if(this.health === 0) {
           this.kill();
@@ -218,7 +219,6 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
         }
       }, this);
       game.add.tween(this).to({alpha: 0.5}, 100, Phaser.Easing.Linear.None, true);
-      game.add.tween(this.miningText).to({y: this.miningText.y - 50, alpha: 0}, 500, Phaser.Easing.Linear.None, true);
       $rootScope.$apply();
     }
     
@@ -246,6 +246,8 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
 angular.module('app').service('GameService', function($log, $rootScope,$timeout, $controller) {
   var game = null;
   var stats = {};
+  var numOnScreen = 0;
+  var lastScale = 0;
   $log.debug('game service init');
 
   return {
@@ -274,15 +276,11 @@ angular.module('app').service('GameService', function($log, $rootScope,$timeout,
       return stats[stat].value;
     },
     setStat: function(stat, level, value) {
+      level = level || 0;
       stats[stat] = {
         level: level,
         value: value
       };
-
-      if(stats.asteroids && stats.miners && stats.globalScale && stats.asteroids.value + stats.miners.value % 5 === 0) {
-        stats.globalScale.level = 0;
-        stats.globalScale.value = stats.globalScale.value * 0.66;
-      }
     },
     modifyMoney: function(amount) {
       amount = amount || 1;
@@ -299,10 +297,6 @@ angular.module('app').service('GameService', function($log, $rootScope,$timeout,
       amount = amount || 1;
       stats[stat].level = 0;
       stats[stat].value += amount;
-      if(stats.asteroids.value + stats.miners.value % 5 === 0) {
-        stats.globalScale.level = 0;
-        stats.globalScale.value = stats.globalScale.value * 0.66;
-      }
     }
   };
 });
@@ -332,6 +326,7 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
     this.name = 'miner-' + nameCounter;
     this.target = {};
     this.rotationTween = null;
+    this.laser = null;
     nameCounter++;
     game.add.existing(this);
 
@@ -348,6 +343,8 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
   
   Miner.prototype.miningComplete = function() {
     this.mining = false;
+    this.laser.kill();
+    this.laser = null;
   };
 
   Miner.prototype.update = function() {
@@ -371,10 +368,18 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
 
       if(closest.asteroid.obj ) {
         this.rotation = game.physics.angleBetween(this, closest.asteroid.obj);
-        if (closest.asteroid.distance <= GameService.getStat('miningRange') && closest.asteroid.obj.targetable) {
+        if (closest.asteroid.distance <= GameService.getStat('miningRange') * GameService.getStat('globalScale') && closest.asteroid.obj.targetable) {
           this.body.velocity.x = 0;
           this.body.velocity.y = 0;
           this.mining = true;
+          this.laser = game.lasers.getFirstDead();
+          this.laser.x = this.x;
+          this.laser.scale.setTo(GameService.getStat('globalScale'),GameService.getStat('globalScale'));
+          this.laser.y = this.y;
+          this.laser.rotation = this.rotation - Math.PI/2;
+          this.laser.height = closest.asteroid.distance;
+          this.laser.width = 1;
+          this.laser.revive();
           closest.asteroid.obj.attachMiner(this);
         } else {
           game.physics.moveToObject(this, closest.asteroid.obj, GameService.getStat('minerAcceleration'));

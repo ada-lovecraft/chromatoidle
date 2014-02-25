@@ -13,6 +13,7 @@ angular.module('app').controller('BootStateCtrl', function($scope, $log, GameSer
     game.load.image('asteroid', 'img/comet-small.png');
     game.load.image('money', 'img/money.png');
     game.load.bitmapFont('minecraftia', 'fonts/minecraftia.png', 'fonts/minecraftia.xml');
+    game.load.image('laser', 'img/laser.png');
 
   };
 

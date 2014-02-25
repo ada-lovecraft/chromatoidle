@@ -2,6 +2,8 @@
 angular.module('app').service('GameService', function($log, $rootScope,$timeout, $controller) {
   var game = null;
   var stats = {};
+  var numOnScreen = 0;
+  var lastScale = 0;
   $log.debug('game service init');
 
   return {
@@ -30,15 +32,11 @@ angular.module('app').service('GameService', function($log, $rootScope,$timeout,
       return stats[stat].value;
     },
     setStat: function(stat, level, value) {
+      level = level || 0;
       stats[stat] = {
         level: level,
         value: value
       };
-
-      if(stats.asteroids && stats.miners && stats.globalScale && stats.asteroids.value + stats.miners.value % 5 === 0) {
-        stats.globalScale.level = 0;
-        stats.globalScale.value = stats.globalScale.value * 0.66;
-      }
     },
     modifyMoney: function(amount) {
       amount = amount || 1;
@@ -55,10 +53,6 @@ angular.module('app').service('GameService', function($log, $rootScope,$timeout,
       amount = amount || 1;
       stats[stat].level = 0;
       stats[stat].value += amount;
-      if(stats.asteroids.value + stats.miners.value % 5 === 0) {
-        stats.globalScale.level = 0;
-        stats.globalScale.value = stats.globalScale.value * 0.66;
-      }
     }
   };
 });

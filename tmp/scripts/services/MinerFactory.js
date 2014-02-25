@@ -24,6 +24,7 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
     this.name = 'miner-' + nameCounter;
     this.target = {};
     this.rotationTween = null;
+    this.laser = null;
     nameCounter++;
     game.add.existing(this);
 
@@ -40,6 +41,8 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
   
   Miner.prototype.miningComplete = function() {
     this.mining = false;
+    this.laser.kill();
+    this.laser = null;
   };
 
   Miner.prototype.update = function() {
@@ -63,10 +66,18 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
 
       if(closest.asteroid.obj ) {
         this.rotation = game.physics.angleBetween(this, closest.asteroid.obj);
-        if (closest.asteroid.distance <= GameService.getStat('miningRange') && closest.asteroid.obj.targetable) {
+        if (closest.asteroid.distance <= GameService.getStat('miningRange') * GameService.getStat('globalScale') && closest.asteroid.obj.targetable) {
           this.body.velocity.x = 0;
           this.body.velocity.y = 0;
           this.mining = true;
+          this.laser = game.lasers.getFirstDead();
+          this.laser.x = this.x;
+          this.laser.scale.setTo(GameService.getStat('globalScale'),GameService.getStat('globalScale'));
+          this.laser.y = this.y;
+          this.laser.rotation = this.rotation - Math.PI/2;
+          this.laser.height = closest.asteroid.distance;
+          this.laser.width = 1;
+          this.laser.revive();
           closest.asteroid.obj.attachMiner(this);
         } else {
           game.physics.moveToObject(this, closest.asteroid.obj, GameService.getStat('minerAcceleration'));

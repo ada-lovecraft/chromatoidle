@@ -5,15 +5,17 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
   console.debug('scope:', $scope);
 
   $rootScope.$on('rescale', state.rescaleAll);
-
+  $scope.livingThings = 0;
+  $scope.lastRescale = 0;
+  $scope.lastScale = 1;
   state.create = function() {
-
     $scope.asteroids = game.asteroids = game.add.group();
     $scope.miners = game.miners = game.add.group();
+    $scope.lasers = game.lasers = game.add.group();
+    $scope.lasers.createMultiple(100,'laser');
+    $scope.lasers.setAll('anchor.x',0);
+    $scope.lasers.setAll('anchor.y',0);
 
-    
-    
-    
   };
 
   state.update = function() {
@@ -27,6 +29,10 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
       var miner = new Miner();
       $scope.miners.add(miner);
     }
+
+    $scope.maxLivingThings = GameService.getStat('asteroids') + GameService.getStat('miners');
+    var newScale = (1000 - $scope.maxLivingThings) / 2000 ;
+    GameService.setStat('globalScale', 0, newScale);
   };
 
   state.render = function() {

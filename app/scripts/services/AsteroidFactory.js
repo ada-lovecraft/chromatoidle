@@ -50,14 +50,10 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
     this.movementTween.to({x: targetX, y: targetY},2000, Phaser.Easing.Cubic.Out);
     this.movementTween.start();
     this.movementTween.onComplete.add(function() {
-      console.debug('setting targetable');
       this.targetable = true;
     }, this);
     this.alphaTween.to({alpha:0.5}, 500, Phaser.Easing.Cubic.Out);
 
-    this.miningText = game.add.bitmapText(this.x, this.y, '+1', {font: '16px minecraftia', align: 'center'});
-    this.miningText.anchor.setTo(0.5, 0.5);
-    this.miningText.alpha = 0;
   };
 
   Asteroid.prototype = Object.create(Phaser.Sprite.prototype);
@@ -70,14 +66,12 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
   Asteroid.prototype.update = function() {
     var scale;
     this.angle += this.rotateSpeed;
+
     if((this.input.pointerDown(game.input.activePointer.id) || this.hasAttachedMiner) && this.alive && game.time.now >= this.miningTimer) {
       this.miningTimer = game.time.now + GameService.getStat('miningSpeed');
       GameService.modifyMoney();
       this.health--;
-      this.miningText.alpha = 1;
-      scale = this.health / this.maxHealth * GameService.getStat('globalScale');
-      this.miningText.x = this.x;
-      this.miningText.y = this.y - this.height/2;
+      scale = (this.health / this.maxHealth * GameService.getStat('globalScale'));
       game.add.tween(this.scale).to({x: scale, y: scale}, GameService.getStat('miningSpeed'), Phaser.Easing.Elastic.Out, true).onComplete.add(function() {
         if(this.health === 0) {
           this.kill();
@@ -86,7 +80,6 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
         }
       }, this);
       game.add.tween(this).to({alpha: 0.5}, 100, Phaser.Easing.Linear.None, true);
-      game.add.tween(this.miningText).to({y: this.miningText.y - 50, alpha: 0}, 500, Phaser.Easing.Linear.None, true);
       $rootScope.$apply();
     }
     
