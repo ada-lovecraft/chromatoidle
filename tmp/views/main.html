@@ -9,7 +9,7 @@
       <div class="col-md-12">
         <h5>{{upgrade.label}}:<small> Current Level: {{stats[upgradeKey].level}}</small></h5>
         <div ng-repeat="(levelNumber, level) in upgrade.levels" class="col-md-1">       
-          <button type="button" ng-click="purchaseUpgrade(upgradeKey,levelNumber)" ng-disabled="stats.money.value &lt; level.cost || stats[upgradeKey].level &lt;= levelNumber" ng-hide="levelNumber == 0" class="btn btn-primary btn-xs">{{levelNumber}}</button>
+          <button type="button" ng-click="purchaseUpgrade(upgradeKey,levelNumber)" ng-disabled="stats.money.value &lt; level.cost || stats[upgradeKey].level &gt;= levelNumber" ng-hide="levelNumber == 0" class="btn btn-primary btn-xs">{{levelNumber}}</button>
         </div>
       </div>
     </div>
