@@ -130,6 +130,7 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
   Miner.prototype.kill = function() {
     console.debug('killing miner');
     Phaser.Sprite.prototype.kill.call(this);
+    this.nameText.destroy();
     if(this.laser) { this.laser.kill(); }
     if(this.target) { this.target.detachMiner(); }
     this.mining = false;

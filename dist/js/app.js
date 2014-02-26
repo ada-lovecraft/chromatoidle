@@ -401,7 +401,7 @@ angular.module('app').factory('Defender', function($rootScope, GameService) {
     var closest = {
       enemy: {}
     };
-    game.enemies.forEachAlive(function(asteroid) {
+    game.enemyMiners.forEachAlive(function(asteroid) {
       if(!asteroid.hasAttachedDefender) {
         var d = game.physics.distanceBetween(self, asteroid);
         if( !closest.enemy.distance || d < closest.enemy.distance) {
@@ -433,7 +433,6 @@ angular.module('app').factory('Defender', function($rootScope, GameService) {
       console.debug('not running');
       var targetX = game.world.randomX,
         targetY = game.world.randomY;
-      console.debug('targetX', targetX, 'targetY:', targetY);
       this.rotation = game.physics.angleToXY(this,targetX, targetY) + Math.PI / 2;
       game.physics.accelerateToXY(this, targetX, targetY, GameService.getStat('defenderAcceleration'), GameService.getStat('defenderAcceleration') * 1.5,GameService.getStat('defenderAcceleration') * 1.5);
     }
@@ -631,6 +630,7 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
   Miner.prototype.kill = function() {
     console.debug('killing miner');
     Phaser.Sprite.prototype.kill.call(this);
+    this.nameText.destroy();
     if(this.laser) { this.laser.kill(); }
     if(this.target) { this.target.detachMiner(); }
     this.mining = false;
