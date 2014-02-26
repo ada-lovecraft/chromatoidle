@@ -29,6 +29,7 @@ angular.module('app').controller('BootStateCtrl', function($scope, $log, GameSer
 
   state.update = function() {
     if (!!ready) {
+      game.stage.disableVisibilityChange = true;
       GameService.switchState('play');
     }
   };
