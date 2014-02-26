@@ -127,14 +127,15 @@ angular.module('app').factory('UpgradeService', function($log, $rootScope,$timeo
 
     },
     init: function(u) {
-      _.each(u, function(value, key) {
+      var key, value;
+      for (key in u) {
+        value = u[key];
         if(upgrades[key]) {
           GameService.setStat(key, value.level, upgrades[key].levels[value.level].value);
         } else {
           GameService.setStat(key, 0, value.value);
         }
-      });
-
+      }
     },
   };
 });

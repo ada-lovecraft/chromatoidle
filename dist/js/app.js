@@ -25,6 +25,12 @@ angular.module('app').controller('BootStateCtrl', function($scope, $log, GameSer
     game.load.image('money', 'img/money.png');
     game.load.bitmapFont('minecraftia', 'fonts/minecraftia.png', 'fonts/minecraftia.xml');
     game.load.image('laser', 'img/laser.png');
+    game.load.image('enemyLaser', 'img/enemy-laser.png');
+    game.load.image('enemyMiner', 'img/enemy-small.png');
+    game.load.image('bullet', 'img/bullet.png');
+    game.load.image('enemyBullet', 'img/enemy-bullet.png');
+    game.load.image('defender', 'img/defender.png');
+    game.load.image('enemyDefender', 'img/enemy-defender.png');
 
   };
 
@@ -53,12 +59,7 @@ angular.module('app').controller('MainCtrl', function($scope, $log, $interval, G
   GameService.init('asteroidle-game');
   GameService.addState('boot', 'BootStateCtrl', $scope);
   GameService.addState('play', 'PlayStateCtrl', $scope);
-  GameService.switchState('boot');
-  
-  
-  $scope.upgrades = UpgradeService.upgrades();
-  $scope.purchasables = UpgradeService.purchasables();
-  var stats = localStorageService.get('asteroidle-stats') || {
+  var defaults = {
     money: {level: 0, value: 0},
     minerAcceleration: {level: 0, value: 0},
     miningSpeed: {level: 0, value: 0},
@@ -66,11 +67,30 @@ angular.module('app').controller('MainCtrl', function($scope, $log, $interval, G
     asteroids: {level: 0, value: 0},
     asteroidValue: {level: 0, value: 0},
     globalScale: {level:0, value: 1},
-    miners: {level: 0, value: 0}
+    miners: { level: 0, value: 0},
+    defenders:{ level:0, value:0 },
+    defenderBulletInterval: {level:0, value: 1500},
+    defenderAcceleration: {level: 0, value: 40},
+    defenderBulletSpeed: {level: 0, value: 300},
+    defenderDistance: {level: 0, value: 100}
   };
   
+  
+  $scope.upgrades = UpgradeService.upgrades();
+  $scope.purchasables = UpgradeService.purchasables();
+  var stats = localStorageService.get('asteroidle-stats');
+  console.debug('stats:', stats);
+  if(!stats) {
+    stats = defaults;
+  }
+  else {
+    _.defaults(stats, defaults);
+  }
+  console.debug('stats:', stats);
   UpgradeService.init(stats);
   $scope.stats = GameService.getStats();
+
+  GameService.switchState('boot');
 
 
   $scope.$watch(GameService.getStats, function(newVal) {
@@ -91,7 +111,8 @@ angular.module('app').controller('MainCtrl', function($scope, $log, $interval, G
 
 });
 'use strict';
-angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $controller, GameService, StateFactory, Asteroid, Miner) {
+angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $controller, GameService, StateFactory, Asteroid, Miner, Defender) {
+  console.debug('play state');
   var game = GameService.get();
   var state = new StateFactory();
   console.debug('scope:', $scope);
@@ -100,18 +121,39 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
   $scope.livingThings = 0;
   $scope.lastRescale = 0;
   $scope.lastScale = 1;
+
   state.create = function() {
     $scope.asteroids = game.asteroids = game.add.group();
     $scope.miners = game.miners = game.add.group();
+    $scope.defenders = game.defenders = game.add.group();
     $scope.lasers = game.lasers = game.add.group();
+    $scope.bullets = game.bullets = game.add.group();
+
+    $scope.enemyMiners = game.enemies = game.add.group();
+    $scope.enemyBullets = game.enemyBullets = game.add.group();
+    $scope.enemyLasers = game.enemyLasers = game.add.group();
+
     $scope.lasers.createMultiple(100,'laser');
     $scope.lasers.setAll('anchor.x',0);
     $scope.lasers.setAll('anchor.y',0);
 
+    $scope.bullets.createMultiple(100,'bullet');
+    $scope.bullets.setAll('anchor.x',0);
+    $scope.bullets.setAll('anchor.y',0);
+    $scope.bullets.setAll('outOfBoundsKill', true);
+
+    $scope.enemyLasers.createMultiple(100,'enemyLaser');
+    $scope.enemyLasers.setAll('anchor.x',0);
+    $scope.enemyLasers.setAll('anchor.y',0);
+
+    $scope.enemyBullets.createMultiple(100,'bullet');
+    $scope.enemyBullets.setAll('anchor.x',0);
+    $scope.enemyBullets.setAll('anchor.y',0);
+
+
   };
 
   state.update = function() {
-
     if ($scope.asteroids.countLiving() < GameService.getStat('asteroids')) {
       var asteroid = new Asteroid();
       $scope.asteroids.add(asteroid);
@@ -122,9 +164,26 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
       $scope.miners.add(miner);
     }
 
+    if($scope.defenders.countLiving() < GameService.getStat('defenders')) {
+      var defender = new Defender();
+      $scope.defenders.add(defender);
+    }
+    /*
+    if(game.rnd.integer() % 100 === 0) {
+      var enemyMiner = new Miner(true);
+      $scope.enemyMiners.add(enemyMiner);
+    }*/
+    if($scope.enemyMiners.countLiving() < 1) {
+      var enemyMiner = new Miner(true);
+      $scope.enemyMiners.add(enemyMiner);
+    }
+
     $scope.maxLivingThings = GameService.getStat('asteroids') + GameService.getStat('miners');
     var newScale = (1000 - $scope.maxLivingThings) / 2000 ;
     GameService.setStat('globalScale', 0, newScale);
+
+    game.physics.collide($scope.enemyMiners, $scope.bullets, state.destroyEnemyHandler);
+
   };
 
   state.render = function() {
@@ -133,6 +192,10 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
 
   state.rescaleAll = function(evt, newScale) {
     $scope.world.scale.setTo(newScale, newScale);
+  };
+  state.destroyEnemyHandler = function(enemy, bullet) {
+    enemy.kill();
+    bullet.kill();
   };
 
   return state;
@@ -176,6 +239,7 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
       break;
     }
     
+    
     this.movementTween = game.add.tween(this);
     this.alphaTween = game.add.tween(this);
     this.targetable = false;
@@ -203,28 +267,37 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
   };
 
   Asteroid.prototype.update = function() {
-    var scale;
-    this.angle += this.rotateSpeed;
-
-    if((this.input.pointerDown(game.input.activePointer.id) || this.hasAttachedMiner) && this.alive && game.time.now >= this.miningTimer) {
-      this.miningTimer = game.time.now + GameService.getStat('miningSpeed');
-      GameService.modifyMoney();
-      this.health--;
-      scale = (this.health / this.maxHealth * GameService.getStat('globalScale'));
-      game.add.tween(this.scale).to({x: scale, y: scale}, GameService.getStat('miningSpeed'), Phaser.Easing.Elastic.Out, true).onComplete.add(function() {
-        if(this.health === 0) {
-          this.kill();
-          this.detachMiner();
-          
-        }
-      }, this);
-      game.add.tween(this).to({alpha: 0.5}, 100, Phaser.Easing.Linear.None, true);
-      $rootScope.$apply();
-    }
     
+    this.angle += this.rotateSpeed;
+    if((this.input.pointerDown(game.input.activePointer.id) && !this.hasAttachedMiner && this.alive && game.time.now >= this.miningTimer)) {
+      this.mine();
+    }
+    if(this.hasAttachedMiner && this.alive && game.time.now >= this.miningTimer) {
+      this.mine();
+    }
+
     if(game.time.now >= this.miningTimer) {
       game.add.tween(this).to({alpha: 1}, 100, Phaser.Easing.Linear.None, true);
     }
+
+  };
+  Asteroid.prototype.mine = function() {
+    var scale;
+    this.miningTimer = game.time.now + GameService.getStat('miningSpeed');
+    if(!this.hasAttachedMiner || (this.hasAttachedMiner && !this.attachedMiner.isEnemy)) {
+      GameService.modifyMoney();
+    }
+    this.health--;
+    scale = (this.health / this.maxHealth * GameService.getStat('globalScale'));
+    game.add.tween(this.scale).to({x: scale, y: scale}, GameService.getStat('miningSpeed'), Phaser.Easing.Elastic.Out, true).onComplete.add(function() {
+      if(this.health === 0) {
+        this.kill();
+        this.detachMiner();
+        
+      }
+    }, this);
+    game.add.tween(this).to({alpha: 0.5}, 100, Phaser.Easing.Linear.None, true);
+    $rootScope.$apply();
   };
 
   Asteroid.prototype.attachMiner = function(miner) {
@@ -235,12 +308,132 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
   Asteroid.prototype.detachMiner = function() {
     if(this.hasAttachedMiner) {
       this.attachedMiner.miningComplete();
-      this.attachedMiner = null;
       this.hasAttachedMiner = false;
     }
   };
 
   return Asteroid;
+});
+
+'use strict';
+
+angular.module('app').factory('Defender', function($rootScope, GameService) {
+  var game = GameService.get();
+  var nameCounter = 0;
+  var Defender = function(isEnemy) {
+    this.spawn = {
+      x: game.world.randomX,
+      y: game.world.randomY
+    };
+    this.isEnemy = isEnemy || false;
+
+    var skin = 'defender';
+    if (this.isEnemy) {
+      skin = 'enemyDefender';
+    }
+    var coin = game.rnd.integer % 4;
+    switch(coin) {
+    case 0:
+      this.spawn.x = -32;
+      this.span.y = game.world.randomY;
+      break;
+    case 1:
+      this.spawn.x = game.world.width + 32;
+      this.spany = game.world.randomY;
+      break;
+    case 2:
+      this.spawn.x = game.world.randomX;
+      this.spawn.y = -32;
+      break;
+    case 3:
+      this.spawn.x = game.world.randomX;
+      this.spawn.y = game.world.height + 32;
+      break;
+    }
+    Phaser.Sprite.call(this, game, this.spawn.x, this.spawn.y, skin);
+    this.anchor.setTo(0.5, 0.5);
+    this.scale.setTo(GameService.getStat('globalScale'),GameService.getStat('globalScale'));
+    this.body.collideWorldBounds = true;
+    this.body.maxVelocity.x = 100;
+    this.body.maxVelocity.y = 100;
+    this.body.drag = {x: 100, y:100};
+    this.bulletTime = 0;
+    this.pulseTime = 0;
+    this.name = 'defender-' + nameCounter;
+    this.target = {};
+    this.rotationTween = null;
+    this.movementTween = game.add.tween(this);
+    this.patrolTime = 0;
+    
+    nameCounter++;
+    game.add.existing(this);
+
+    
+  };
+
+  Defender.prototype = Object.create(Phaser.Sprite.prototype);
+  Defender.prototype.constructor = Defender;
+
+  Defender.prototype.fire = function() {
+    if (game.time.now > this.bulletTime && this.alive) {
+      this.bulletTime = game.time.now + GameService.getStat('defenderBulletInterval');
+      var bullet = this.isEnemy ? game.enemyBullets.getFirstDead() : game.bullets.getFirstDead();
+      bullet.x = this.x;
+      bullet.y = this.y;
+      bullet.body.velocity.x = Math.sin(this.rotation) * GameService.getStat('defenderBulletSpeed');
+      bullet.body.velocity.y = -Math.cos(this.rotation) * GameService.getStat('defenderBulletSpeed');
+      bullet.rotation = this.rotation - Math.PI / 2;
+      bullet.scale.setTo(0.75 * GameService.getStat('globalScale'), 0.75 * GameService.getStat('globalScale'));
+
+      bullet.revive();
+    }
+  };
+  
+  Defender.prototype.update = function() {
+    var self = this;
+    this.scale.setTo(GameService.getStat('globalScale'),GameService.getStat('globalScale'));
+    this.body.angularVelocity = 0;
+    var closest = {
+      enemy: {}
+    };
+    game.enemies.forEachAlive(function(asteroid) {
+      if(!asteroid.hasAttachedDefender) {
+        var d = game.physics.distanceBetween(self, asteroid);
+        if( !closest.enemy.distance || d < closest.enemy.distance) {
+          closest.enemy.distance = d;
+          closest.enemy.obj = asteroid;
+        }
+      }
+    });
+
+
+    if(closest.enemy.obj ) {
+      this.rotation = game.physics.angleBetween(this, closest.enemy.obj) + Math.PI / 2;
+      if (closest.enemy.distance <= GameService.getStat('defenderDistance')) {
+        this.body.velocity.x = 0;
+        this.body.velocity.y = 0;
+        this.fire();
+      } else {
+        game.physics.moveToObject(this, closest.enemy.obj, GameService.getStat('defenderAcceleration'));
+      }
+
+    } else {
+      this.patrol();
+    }
+  };
+
+  Defender.prototype.patrol = function() {
+    if(game.time.now > this.patrolTime ) {
+      this.patrolTime = game.time.now + 2000;
+      console.debug('not running');
+      var targetX = game.world.randomX,
+        targetY = game.world.randomY;
+      console.debug('targetX', targetX, 'targetY:', targetY);
+      this.rotation = game.physics.angleToXY(this,targetX, targetY) + Math.PI / 2;
+      game.physics.accelerateToXY(this, targetX, targetY, GameService.getStat('defenderAcceleration'), GameService.getStat('defenderAcceleration') * 1.5,GameService.getStat('defenderAcceleration') * 1.5);
+    }
+  };
+  return Defender;
 });
 'use strict';
 angular.module('app').service('GameService', function($log, $rootScope,$timeout, $controller) {
@@ -258,7 +451,7 @@ angular.module('app').service('GameService', function($log, $rootScope,$timeout,
       return game;
     },
     init: function(selector) {
-      game = new Phaser.Game(800, 600, Phaser.AUTO, selector);
+      game = new Phaser.Game(800, 600, Phaser.AUTO, selector,{ forceSetTimeOut: true });
       $log.debug('game instantiated:', game);
     },
     addState: function(stateName, controllerName, scope) {
@@ -306,15 +499,36 @@ angular.module('app').service('GameService', function($log, $rootScope,$timeout,
 angular.module('app').factory('Miner', function($rootScope, GameService) {
   var game = GameService.get();
   var nameCounter = 0;
-  var Miner = function(x, y) {
+  var Miner = function(isEnemy) {
     this.spawn = {
-      x: x || game.world.randomX,
-      y: y || game.world.randomY
+      x: game.world.randomX,
+      y: game.world.randomY
     };
+    this.isEnemy = isEnemy || false;
     
 
+    var skin = this.isEnemy ? 'enemyMiner' : 'miner';
 
-    Phaser.Sprite.call(this, game, this.spawn.x, this.spawn.y, 'miner');
+    var coin = game.rnd.integer % 4;
+    switch(coin) {
+    case 0:
+      this.spawn.x = -32;
+      this.span.y = game.world.randomY;
+      break;
+    case 1:
+      this.spawn.x = game.world.width + 32;
+      this.spany = game.world.randomY;
+      break;
+    case 2:
+      this.spawn.x = game.world.randomX;
+      this.spawn.y = -32;
+      break;
+    case 3:
+      this.spawn.x = game.world.randomX;
+      this.spawn.y = game.world.height + 32;
+      break;
+    }
+    Phaser.Sprite.call(this, game, this.spawn.x, this.spawn.y, skin);
     this.anchor.setTo(0.5, 0.5);
     this.scale.setTo(GameService.getStat('globalScale'),GameService.getStat('globalScale'));
     this.body.collideWorldBounds = true;
@@ -324,7 +538,7 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
     this.bulletTime = 0;
     this.pulseTime = 0;
     this.name = 'miner-' + nameCounter;
-    this.target = {};
+    this.target = null;
     this.rotationTween = null;
     this.laser = null;
     nameCounter++;
@@ -344,14 +558,15 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
   Miner.prototype.miningComplete = function() {
     this.mining = false;
     this.laser.kill();
-    this.laser = null;
+    this.target = null;
+    console.debug('mining complete');
   };
 
   Miner.prototype.update = function() {
     var self = this;
     this.scale.setTo(GameService.getStat('globalScale'),GameService.getStat('globalScale'));
     this.body.angularVelocity = 0;
-    if(!this.mining) {
+    if(!this.mining && this.alive) {
       var closest = {
         asteroid: {}
       };
@@ -372,7 +587,9 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
           this.body.velocity.x = 0;
           this.body.velocity.y = 0;
           this.mining = true;
-          this.laser = game.lasers.getFirstDead();
+          this.target = closest.asteroid.obj;
+          console.debug('isEnemy', this.isEnemy, this.isEnemy ? 'enemyLaser' : 'friendlyLaser');
+          this.laser = this.isEnemy ? game.enemyLasers.getFirstDead() : game.lasers.getFirstDead();
           this.laser.x = this.x;
           this.laser.scale.setTo(GameService.getStat('globalScale'),GameService.getStat('globalScale'));
           this.laser.y = this.y;
@@ -387,7 +604,13 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
       }
     }
   };
-  
+  Miner.prototype.kill = function() {
+    console.debug('killing miner');
+    Phaser.Sprite.prototype.kill.call(this);
+    if(this.laser) { this.laser.kill(); }
+    if(this.target) { this.target.detachMiner(); }
+    this.mining = false;
+  };
   Miner.rotationTweenCallback = function() {
     this.pulse();
   };
@@ -578,14 +801,15 @@ angular.module('app').factory('UpgradeService', function($log, $rootScope,$timeo
 
     },
     init: function(u) {
-      _.each(u, function(value, key) {
+      var key, value;
+      for (key in u) {
+        value = u[key];
         if(upgrades[key]) {
           GameService.setStat(key, value.level, upgrades[key].levels[value.level].value);
         } else {
           GameService.setStat(key, 0, value.value);
         }
-      });
-
+      }
     },
   };
 });

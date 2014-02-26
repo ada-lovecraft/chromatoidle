@@ -5,12 +5,7 @@ angular.module('app').controller('MainCtrl', function($scope, $log, $interval, G
   GameService.init('asteroidle-game');
   GameService.addState('boot', 'BootStateCtrl', $scope);
   GameService.addState('play', 'PlayStateCtrl', $scope);
-  GameService.switchState('boot');
-  
-  
-  $scope.upgrades = UpgradeService.upgrades();
-  $scope.purchasables = UpgradeService.purchasables();
-  var stats = localStorageService.get('asteroidle-stats') || {
+  var defaults = {
     money: {level: 0, value: 0},
     minerAcceleration: {level: 0, value: 0},
     miningSpeed: {level: 0, value: 0},
@@ -18,11 +13,30 @@ angular.module('app').controller('MainCtrl', function($scope, $log, $interval, G
     asteroids: {level: 0, value: 0},
     asteroidValue: {level: 0, value: 0},
     globalScale: {level:0, value: 1},
-    miners: {level: 0, value: 0}
+    miners: { level: 0, value: 0},
+    defenders:{ level:0, value:0 },
+    defenderBulletInterval: {level:0, value: 1500},
+    defenderAcceleration: {level: 0, value: 40},
+    defenderBulletSpeed: {level: 0, value: 300},
+    defenderDistance: {level: 0, value: 100}
   };
   
+  
+  $scope.upgrades = UpgradeService.upgrades();
+  $scope.purchasables = UpgradeService.purchasables();
+  var stats = localStorageService.get('asteroidle-stats');
+  console.debug('stats:', stats);
+  if(!stats) {
+    stats = defaults;
+  }
+  else {
+    _.defaults(stats, defaults);
+  }
+  console.debug('stats:', stats);
   UpgradeService.init(stats);
   $scope.stats = GameService.getStats();
+
+  GameService.switchState('boot');
 
 
   $scope.$watch(GameService.getStats, function(newVal) {

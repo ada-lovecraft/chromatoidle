@@ -14,6 +14,12 @@ angular.module('app').controller('BootStateCtrl', function($scope, $log, GameSer
     game.load.image('money', 'img/money.png');
     game.load.bitmapFont('minecraftia', 'fonts/minecraftia.png', 'fonts/minecraftia.xml');
     game.load.image('laser', 'img/laser.png');
+    game.load.image('enemyLaser', 'img/enemy-laser.png');
+    game.load.image('enemyMiner', 'img/enemy-small.png');
+    game.load.image('bullet', 'img/bullet.png');
+    game.load.image('enemyBullet', 'img/enemy-bullet.png');
+    game.load.image('defender', 'img/defender.png');
+    game.load.image('enemyDefender', 'img/enemy-defender.png');
 
   };
 

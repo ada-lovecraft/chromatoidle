@@ -37,6 +37,7 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
       break;
     }
     
+    
     this.movementTween = game.add.tween(this);
     this.alphaTween = game.add.tween(this);
     this.targetable = false;
@@ -64,28 +65,37 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
   };
 
   Asteroid.prototype.update = function() {
-    var scale;
-    this.angle += this.rotateSpeed;
-
-    if((this.input.pointerDown(game.input.activePointer.id) || this.hasAttachedMiner) && this.alive && game.time.now >= this.miningTimer) {
-      this.miningTimer = game.time.now + GameService.getStat('miningSpeed');
-      GameService.modifyMoney();
-      this.health--;
-      scale = (this.health / this.maxHealth * GameService.getStat('globalScale'));
-      game.add.tween(this.scale).to({x: scale, y: scale}, GameService.getStat('miningSpeed'), Phaser.Easing.Elastic.Out, true).onComplete.add(function() {
-        if(this.health === 0) {
-          this.kill();
-          this.detachMiner();
-          
-        }
-      }, this);
-      game.add.tween(this).to({alpha: 0.5}, 100, Phaser.Easing.Linear.None, true);
-      $rootScope.$apply();
-    }
     
+    this.angle += this.rotateSpeed;
+    if((this.input.pointerDown(game.input.activePointer.id) && !this.hasAttachedMiner && this.alive && game.time.now >= this.miningTimer)) {
+      this.mine();
+    }
+    if(this.hasAttachedMiner && this.alive && game.time.now >= this.miningTimer) {
+      this.mine();
+    }
+
     if(game.time.now >= this.miningTimer) {
       game.add.tween(this).to({alpha: 1}, 100, Phaser.Easing.Linear.None, true);
     }
+
+  };
+  Asteroid.prototype.mine = function() {
+    var scale;
+    this.miningTimer = game.time.now + GameService.getStat('miningSpeed');
+    if(!this.hasAttachedMiner || (this.hasAttachedMiner && !this.attachedMiner.isEnemy)) {
+      GameService.modifyMoney();
+    }
+    this.health--;
+    scale = (this.health / this.maxHealth * GameService.getStat('globalScale'));
+    game.add.tween(this.scale).to({x: scale, y: scale}, GameService.getStat('miningSpeed'), Phaser.Easing.Elastic.Out, true).onComplete.add(function() {
+      if(this.health === 0) {
+        this.kill();
+        this.detachMiner();
+        
+      }
+    }, this);
+    game.add.tween(this).to({alpha: 0.5}, 100, Phaser.Easing.Linear.None, true);
+    $rootScope.$apply();
   };
 
   Asteroid.prototype.attachMiner = function(miner) {
@@ -96,7 +106,6 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
   Asteroid.prototype.detachMiner = function() {
     if(this.hasAttachedMiner) {
       this.attachedMiner.miningComplete();
-      this.attachedMiner = null;
       this.hasAttachedMiner = false;
     }
   };

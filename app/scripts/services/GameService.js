@@ -14,7 +14,7 @@ angular.module('app').service('GameService', function($log, $rootScope,$timeout,
       return game;
     },
     init: function(selector) {
-      game = new Phaser.Game(800, 600, Phaser.AUTO, selector);
+      game = new Phaser.Game(800, 600, Phaser.AUTO, selector,{ forceSetTimeOut: true });
       $log.debug('game instantiated:', game);
     },
     addState: function(stateName, controllerName, scope) {
