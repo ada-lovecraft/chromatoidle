@@ -23,12 +23,12 @@ angular.module('app').factory('UpgradeService', function($log, $rootScope,$timeo
       label: 'Mining Range',
       stat: 'miningRange',
       levels: [
-        { cost: 0, value: 32 },
-        { cost: 10, value: 64 },
-        { cost: 100, value: 128 },
-        { cost: 1000, value: 256},
-        { cost: 10000, value: 512 },
-        { cost: 100000, value: 1024 }
+        { cost: 0, value: 64 },
+        { cost: 10, value: 96 },
+        { cost: 100, value: 144 },
+        { cost: 1000, value: 216},
+        { cost: 10000, value: 324 },
+        { cost: 100000, value: 486 }
       ]
     },
     minerAcceleration: {
@@ -48,8 +48,8 @@ angular.module('app').factory('UpgradeService', function($log, $rootScope,$timeo
       stat: 'asteroids',
       levels: [
         { cost: 0, value: 1 },
-        { cost: 10, value: 2 },
-        { cost: 100, value: 5 },
+        { cost: 10, value: 5 },
+        { cost: 100, value: 10 },
         { cost: 1000, value: 20 },
         { cost: 10000, value: 50 },
         { cost: 100000, value: 100 },

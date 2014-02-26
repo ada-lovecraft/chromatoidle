@@ -42,12 +42,15 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
     this.body.drag = {x: 100, y:100};
     this.bulletTime = 0;
     this.pulseTime = 0;
-    this.name = 'miner-' + nameCounter;
+    this.name = (this.isEnemy ? 'enemy-miner-' : 'miner-') + nameCounter;
     this.target = null;
     this.rotationTween = null;
     this.laser = null;
+    this.nameText = game.add.bitmapText(this.x, this.y, this.name, {font: '10px minecraftia', align: 'center'});
+    this.nameText.anchor.setTo(0.5, 0.5);
     nameCounter++;
     game.add.existing(this);
+    this.patrolTween = null;
 
     
   };
@@ -69,6 +72,8 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
 
   Miner.prototype.update = function() {
     var self = this;
+    this.nameText.x = this.x;
+    this.nameText.y = this.y - 16;
     this.scale.setTo(GameService.getStat('globalScale'),GameService.getStat('globalScale'));
     this.body.angularVelocity = 0;
     if(!this.mining && this.alive) {
@@ -78,12 +83,18 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
       game.asteroids.forEachAlive(function(asteroid) {
         if(!asteroid.hasAttachedMiner) {
           var d = game.physics.distanceBetween(self, asteroid);
-          if( ! closest.asteroid.distance || d < closest.asteroid.distance) {
+          var chased = true;
+          var chasingMiner = game.enemyMiners.iterate('chasing',asteroid.name, Phaser.Group.RETURN_CHILD) || game.miners.iterate('chasing',asteroid.name, Phaser.Group.RETURN_CHILD);
+          var chasingMinerDistance = chasingMiner && chasingMiner.name !== self.name ? game.physics.distanceBetween(chasingMiner, asteroid) : null;
+          if(!chasingMiner || chasingMiner.name === self.name || chasingMinerDistance > d) {
+            chased = false;
+          }
+          if(!chased && (!closest.asteroid.distance || d < closest.asteroid.distance)) {
             closest.asteroid.distance = d;
             closest.asteroid.obj = asteroid;
           }
         }
-      });
+      },true);
 
 
       if(closest.asteroid.obj ) {
@@ -93,7 +104,6 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
           this.body.velocity.y = 0;
           this.mining = true;
           this.target = closest.asteroid.obj;
-          console.debug('isEnemy', this.isEnemy, this.isEnemy ? 'enemyLaser' : 'friendlyLaser');
           this.laser = this.isEnemy ? game.enemyLasers.getFirstDead() : game.lasers.getFirstDead();
           this.laser.x = this.x;
           this.laser.scale.setTo(GameService.getStat('globalScale'),GameService.getStat('globalScale'));
@@ -104,8 +114,16 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
           this.laser.revive();
           closest.asteroid.obj.attachMiner(this);
         } else {
+          if(this.patrolTween && this.patrolTween.isRunning) {
+            this.patrolTween.stop();
+            this.body.velocity.x = 0;
+            this.body.velocity.y = 0;
+          }
           game.physics.moveToObject(this, closest.asteroid.obj, GameService.getStat('minerAcceleration'));
+          this.chasing = closest.asteroid.obj.name;
         }
+      } else {
+        this.patrol();
       }
     }
   };
@@ -118,6 +136,18 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
   };
   Miner.rotationTweenCallback = function() {
     this.pulse();
+  };
+
+  Miner.prototype.patrol = function() {
+    var x,y;
+    if(!this.patrolTween || !this.patrolTween.isRunning) {
+      this.body.velocity.x = 0;
+      this.body.velocity.y = 0;
+      x = game.world.randomX;
+      y = game.world.randomY;
+      this.rotation = game.physics.angleToXY(this, x, y);
+      this.patrolTween = game.add.tween(this).to({x: x, y: y}, 5000, Phaser.Easing.Linear.None, true);
+    }
   };
 
   return Miner;

@@ -17,7 +17,7 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
     $scope.lasers = game.lasers = game.add.group();
     $scope.bullets = game.bullets = game.add.group();
 
-    $scope.enemyMiners = game.enemies = game.add.group();
+    $scope.enemyMiners = game.enemyMiners = game.add.group();
     $scope.enemyBullets = game.enemyBullets = game.add.group();
     $scope.enemyLasers = game.enemyLasers = game.add.group();
 
@@ -67,11 +67,11 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
     }
 
     $scope.maxLivingThings = GameService.getStat('asteroids') + GameService.getStat('miners');
-    var newScale = (1000 - $scope.maxLivingThings) / 2000 ;
+    var newScale = (1000 - $scope.maxLivingThings) / 2750 ;
     GameService.setStat('globalScale', 0, newScale);
 
     game.physics.collide($scope.enemyMiners, $scope.bullets, state.destroyEnemyHandler);
-
+    
   };
 
   state.render = function() {

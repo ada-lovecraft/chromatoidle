@@ -9,7 +9,7 @@ angular.module('app').controller('MainCtrl', function($scope, $log, $interval, G
     money: {level: 0, value: 0},
     minerAcceleration: {level: 0, value: 0},
     miningSpeed: {level: 0, value: 0},
-    miningRange: {level: 0, value: 0},
+    miningRange: {level: 0, value: 64},
     asteroids: {level: 0, value: 0},
     asteroidValue: {level: 0, value: 0},
     globalScale: {level:0, value: 1},

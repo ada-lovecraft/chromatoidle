@@ -63,7 +63,7 @@ angular.module('app').controller('MainCtrl', function($scope, $log, $interval, G
     money: {level: 0, value: 0},
     minerAcceleration: {level: 0, value: 0},
     miningSpeed: {level: 0, value: 0},
-    miningRange: {level: 0, value: 0},
+    miningRange: {level: 0, value: 64},
     asteroids: {level: 0, value: 0},
     asteroidValue: {level: 0, value: 0},
     globalScale: {level:0, value: 1},
@@ -129,7 +129,7 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
     $scope.lasers = game.lasers = game.add.group();
     $scope.bullets = game.bullets = game.add.group();
 
-    $scope.enemyMiners = game.enemies = game.add.group();
+    $scope.enemyMiners = game.enemyMiners = game.add.group();
     $scope.enemyBullets = game.enemyBullets = game.add.group();
     $scope.enemyLasers = game.enemyLasers = game.add.group();
 
@@ -179,11 +179,11 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
     }
 
     $scope.maxLivingThings = GameService.getStat('asteroids') + GameService.getStat('miners');
-    var newScale = (1000 - $scope.maxLivingThings) / 2000 ;
+    var newScale = (1000 - $scope.maxLivingThings) / 2750 ;
     GameService.setStat('globalScale', 0, newScale);
 
     game.physics.collide($scope.enemyMiners, $scope.bullets, state.destroyEnemyHandler);
-
+    
   };
 
   state.render = function() {
@@ -257,6 +257,9 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
     }, this);
     this.alphaTween.to({alpha:0.5}, 500, Phaser.Easing.Cubic.Out);
 
+    this.nameText = game.add.bitmapText(this.x, this.y, this.name, {font: '10px minecraftia', align: 'center'});
+    this.nameText.anchor.setTo(0.5, 0.5);
+
   };
 
   Asteroid.prototype = Object.create(Phaser.Sprite.prototype);
@@ -267,7 +270,8 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
   };
 
   Asteroid.prototype.update = function() {
-    
+    this.nameText.x = this.x;
+    this.nameText.y = this.y - 16;
     this.angle += this.rotateSpeed;
     if((this.input.pointerDown(game.input.activePointer.id) && !this.hasAttachedMiner && this.alive && game.time.now >= this.miningTimer)) {
       this.mine();
@@ -290,9 +294,10 @@ angular.module('app').factory('Asteroid', function($rootScope, GameService) {
     this.health--;
     scale = (this.health / this.maxHealth * GameService.getStat('globalScale'));
     game.add.tween(this.scale).to({x: scale, y: scale}, GameService.getStat('miningSpeed'), Phaser.Easing.Elastic.Out, true).onComplete.add(function() {
-      if(this.health === 0) {
+      if(this.health <= 0) {
         this.kill();
         this.detachMiner();
+        this.nameText.destroy();
         
       }
     }, this);
@@ -451,7 +456,8 @@ angular.module('app').service('GameService', function($log, $rootScope,$timeout,
       return game;
     },
     init: function(selector) {
-      game = new Phaser.Game(800, 600, Phaser.AUTO, selector,{ forceSetTimeOut: true });
+      game = new Phaser.Game(800, 600, Phaser.AUTO, selector);
+      game.config = { forceSetTimeout: true } ;
       $log.debug('game instantiated:', game);
     },
     addState: function(stateName, controllerName, scope) {
@@ -537,12 +543,15 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
     this.body.drag = {x: 100, y:100};
     this.bulletTime = 0;
     this.pulseTime = 0;
-    this.name = 'miner-' + nameCounter;
+    this.name = (this.isEnemy ? 'enemy-miner-' : 'miner-') + nameCounter;
     this.target = null;
     this.rotationTween = null;
     this.laser = null;
+    this.nameText = game.add.bitmapText(this.x, this.y, this.name, {font: '10px minecraftia', align: 'center'});
+    this.nameText.anchor.setTo(0.5, 0.5);
     nameCounter++;
     game.add.existing(this);
+    this.patrolTween = null;
 
     
   };
@@ -564,6 +573,8 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
 
   Miner.prototype.update = function() {
     var self = this;
+    this.nameText.x = this.x;
+    this.nameText.y = this.y - 16;
     this.scale.setTo(GameService.getStat('globalScale'),GameService.getStat('globalScale'));
     this.body.angularVelocity = 0;
     if(!this.mining && this.alive) {
@@ -573,12 +584,18 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
       game.asteroids.forEachAlive(function(asteroid) {
         if(!asteroid.hasAttachedMiner) {
           var d = game.physics.distanceBetween(self, asteroid);
-          if( ! closest.asteroid.distance || d < closest.asteroid.distance) {
+          var chased = true;
+          var chasingMiner = game.enemyMiners.iterate('chasing',asteroid.name, Phaser.Group.RETURN_CHILD) || game.miners.iterate('chasing',asteroid.name, Phaser.Group.RETURN_CHILD);
+          var chasingMinerDistance = chasingMiner && chasingMiner.name !== self.name ? game.physics.distanceBetween(chasingMiner, asteroid) : null;
+          if(!chasingMiner || chasingMiner.name === self.name || chasingMinerDistance > d) {
+            chased = false;
+          }
+          if(!chased && (!closest.asteroid.distance || d < closest.asteroid.distance)) {
             closest.asteroid.distance = d;
             closest.asteroid.obj = asteroid;
           }
         }
-      });
+      },true);
 
 
       if(closest.asteroid.obj ) {
@@ -588,7 +605,6 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
           this.body.velocity.y = 0;
           this.mining = true;
           this.target = closest.asteroid.obj;
-          console.debug('isEnemy', this.isEnemy, this.isEnemy ? 'enemyLaser' : 'friendlyLaser');
           this.laser = this.isEnemy ? game.enemyLasers.getFirstDead() : game.lasers.getFirstDead();
           this.laser.x = this.x;
           this.laser.scale.setTo(GameService.getStat('globalScale'),GameService.getStat('globalScale'));
@@ -599,8 +615,16 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
           this.laser.revive();
           closest.asteroid.obj.attachMiner(this);
         } else {
+          if(this.patrolTween && this.patrolTween.isRunning) {
+            this.patrolTween.stop();
+            this.body.velocity.x = 0;
+            this.body.velocity.y = 0;
+          }
           game.physics.moveToObject(this, closest.asteroid.obj, GameService.getStat('minerAcceleration'));
+          this.chasing = closest.asteroid.obj.name;
         }
+      } else {
+        this.patrol();
       }
     }
   };
@@ -613,6 +637,18 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
   };
   Miner.rotationTweenCallback = function() {
     this.pulse();
+  };
+
+  Miner.prototype.patrol = function() {
+    var x,y;
+    if(!this.patrolTween || !this.patrolTween.isRunning) {
+      this.body.velocity.x = 0;
+      this.body.velocity.y = 0;
+      x = game.world.randomX;
+      y = game.world.randomY;
+      this.rotation = game.physics.angleToXY(this, x, y);
+      this.patrolTween = game.add.tween(this).to({x: x, y: y}, 5000, Phaser.Easing.Linear.None, true);
+    }
   };
 
   return Miner;
@@ -697,12 +733,12 @@ angular.module('app').factory('UpgradeService', function($log, $rootScope,$timeo
       label: 'Mining Range',
       stat: 'miningRange',
       levels: [
-        { cost: 0, value: 32 },
-        { cost: 10, value: 64 },
-        { cost: 100, value: 128 },
-        { cost: 1000, value: 256},
-        { cost: 10000, value: 512 },
-        { cost: 100000, value: 1024 }
+        { cost: 0, value: 64 },
+        { cost: 10, value: 96 },
+        { cost: 100, value: 144 },
+        { cost: 1000, value: 216},
+        { cost: 10000, value: 324 },
+        { cost: 100000, value: 486 }
       ]
     },
     minerAcceleration: {
@@ -722,8 +758,8 @@ angular.module('app').factory('UpgradeService', function($log, $rootScope,$timeo
       stat: 'asteroids',
       levels: [
         { cost: 0, value: 1 },
-        { cost: 10, value: 2 },
-        { cost: 100, value: 5 },
+        { cost: 10, value: 5 },
+        { cost: 100, value: 10 },
         { cost: 1000, value: 20 },
         { cost: 10000, value: 50 },
         { cost: 100000, value: 100 },

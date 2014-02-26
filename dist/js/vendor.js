@@ -72673,7 +72673,7 @@ Phaser.RequestAnimationFrame.prototype = {
     * @return {boolean}
     */
     isSetTimeOut: function () {
-        return this._isSetTimeOut;
+        return true;
     },
 
     /**
