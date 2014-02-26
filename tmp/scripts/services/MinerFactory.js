@@ -134,6 +134,7 @@ angular.module('app').factory('Miner', function($rootScope, GameService) {
     if(this.laser) { this.laser.kill(); }
     if(this.target) { this.target.detachMiner(); }
     this.mining = false;
+    this.chasing = null;
   };
   Miner.rotationTweenCallback = function() {
     this.pulse();
