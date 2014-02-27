@@ -25,14 +25,12 @@ angular.module('app').controller('MainCtrl', function($scope, $log, $interval, G
   $scope.upgrades = UpgradeService.upgrades();
   $scope.purchasables = UpgradeService.purchasables();
   var stats = localStorageService.get('asteroidle-stats');
-  console.debug('stats:', stats);
   if(!stats) {
     stats = defaults;
   }
   else {
     _.defaults(stats, defaults);
   }
-  console.debug('stats:', stats);
   UpgradeService.init(stats);
   $scope.stats = GameService.getStats();
 

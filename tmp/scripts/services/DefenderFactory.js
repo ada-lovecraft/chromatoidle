@@ -11,30 +11,14 @@ angular.module('app').factory('Defender', function($rootScope, GameService) {
     };
     this.isEnemy = isEnemy || false;
 
-    var skin = 'defender';
+    var skin = this.isEnemy ? 'enemyDefender': 'defender';
     if (this.isEnemy) {
       skin = 'enemyDefender';
     }
-    var coin = game.rnd.integer % 4;
-    switch(coin) {
-    case 0:
-      this.spawn.x = -32;
-      this.span.y = game.world.randomY;
-      break;
-    case 1:
-      this.spawn.x = game.world.width + 32;
-      this.spany = game.world.randomY;
-      break;
-    case 2:
-      this.spawn.x = game.world.randomX;
-      this.spawn.y = -32;
-      break;
-    case 3:
-      this.spawn.x = game.world.randomX;
-      this.spawn.y = game.world.height + 32;
-      break;
-    }
-    Phaser.Sprite.call(this, game, this.spawn.x, this.spawn.y, skin);
+
+    Phaser.Sprite.call(this, game, 0, 0, skin);
+
+    
     this.anchor.setTo(0.5, 0.5);
     this.scale.setTo(GameService.getStat('globalScale'),GameService.getStat('globalScale'));
     this.body.collideWorldBounds = true;
@@ -52,11 +36,33 @@ angular.module('app').factory('Defender', function($rootScope, GameService) {
     nameCounter++;
     game.add.existing(this);
 
+    this.initialize();
+    this.enter();
+
+    this.events.onRevived.add(function() {
+      this.initialize();
+    })
     
   };
 
   Defender.prototype = Object.create(Phaser.Sprite.prototype);
   Defender.prototype.constructor = Defender;
+
+  Defender.prototype.initialize = function() {
+    GameService.setStartPosition(this);
+  };
+
+  Defender.prototype.enter = function() {
+  var targetX = game.world.randomX;
+      var targetY = game.world.randomY;
+      game.add.tween(this).to({x: targetX, y: targetY},2000, Phaser.Easing.Cubic.Out,true).onComplete.add(function() {
+        this.targetable = true;
+        this.alpha = 1;
+        this.visible = true;
+        this.exists = true;
+        this.alive = true;
+      }, this);
+  };
 
   Defender.prototype.fire = function() {
     if (game.time.now > this.bulletTime && this.alive) {
@@ -109,7 +115,6 @@ angular.module('app').factory('Defender', function($rootScope, GameService) {
   Defender.prototype.patrol = function() {
     if(game.time.now > this.patrolTime ) {
       this.patrolTime = game.time.now + 2000;
-      console.debug('not running');
       var targetX = game.world.randomX,
         targetY = game.world.randomY;
       this.rotation = game.physics.angleToXY(this,targetX, targetY) + Math.PI / 2;

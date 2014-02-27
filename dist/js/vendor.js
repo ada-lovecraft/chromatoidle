@@ -9111,7 +9111,7 @@ return jQuery;
 }));
 
 /**
- * @license AngularJS v1.2.14-build.2323+sha.c99dd22
+ * @license AngularJS v1.2.14-build.2337+sha.214c65d
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -9142,7 +9142,7 @@ return jQuery;
  * should all be static strings, not variables or general expressions.
  *
  * @param {string} module The namespace to use for the new minErr instance.
- * @returns {function(string, string, ...): Error} instance
+ * @returns {function(code:string, template:string, ...templateArgs): Error} minErr instance
  */
 
 function minErr(module) {
@@ -9180,7 +9180,7 @@ function minErr(module) {
       return match;
     });
 
-    message = message + '\nhttp://errors.angularjs.org/1.2.14-build.2323+sha.c99dd22/' +
+    message = message + '\nhttp://errors.angularjs.org/1.2.14-build.2337+sha.214c65d/' +
       (module ? module + '/' : '') + code;
     for (i = 2; i < arguments.length; i++) {
       message = message + (i == 2 ? '?' : '&') + 'p' + (i-2) + '=' +
@@ -9480,7 +9480,7 @@ function reverseParams(iteratorFn) {
  * the number string gets longer over time, and it can also overflow, where as the nextId
  * will grow much slower, it is a string, and it will never overflow.
  *
- * @returns an unique alpha-numeric string
+ * @returns {string} an unique alpha-numeric string
  */
 function nextUid() {
   var index = uid.length;
@@ -10244,7 +10244,7 @@ function tryDecodeURIComponent(value) {
 
 /**
  * Parses an escaped url query string into key-value pairs.
- * @returns Object.<(string|boolean)>
+ * @returns {Object.<string,boolean|Array>}
  */
 function parseKeyValue(/**string*/keyValue) {
   var obj = {}, key_value, key;
@@ -10540,9 +10540,9 @@ function assertNotHasOwnProperty(name, context) {
 /**
  * Return the value accessible from the object by path. Any undefined traversals are ignored
  * @param {Object} obj starting object
- * @param {string} path path to traverse
- * @param {boolean=true} bindFnToScope
- * @returns value as accessible by path
+ * @param {String} path path to traverse
+ * @param {boolean} [bindFnToScope=true]
+ * @returns {Object} value as accessible by path
  */
 //TODO(misko): this function needs to be removed
 function getter(obj, path, bindFnToScope) {
@@ -10567,7 +10567,7 @@ function getter(obj, path, bindFnToScope) {
 /**
  * Return the DOM siblings between the first and last node in the given array.
  * @param {Array} array like object
- * @returns jQlite object containing the elements
+ * @returns {DOMElement} object containing the elements
  */
 function getBlockElements(nodes) {
   var startNode = nodes[0],
@@ -10992,7 +10992,7 @@ function setupModuleLoader(window) {
  * - `codeName` – `{string}` – Code name of the release, such as "jiggling-armfat".
  */
 var version = {
-  full: '1.2.14-build.2323+sha.c99dd22',    // all of these placeholder strings will be replaced by grunt's
+  full: '1.2.14-build.2337+sha.214c65d',    // all of these placeholder strings will be replaced by grunt's
   major: 1,    // package task
   minor: 2,
   dot: 14,
@@ -12081,7 +12081,7 @@ HashMap.prototype = {
 
   /**
    * @param key
-   * @returns the value for the key
+   * @returns {Object} the value for the key
    */
   get: function(key) {
     return this[hashKey(key)];
@@ -12266,7 +12266,7 @@ function annotate(fn) {
  * @description
  * Invoke the method and supply the method arguments from the `$injector`.
  *
- * @param {!function} fn The function to invoke. Function parameters are injected according to the
+ * @param {!Function} fn The function to invoke. Function parameters are injected according to the
  *   {@link guide/di $inject Annotation} rules.
  * @param {Object=} self The `this` for the invoked method.
  * @param {Object=} locals Optional object. If preset then any argument names are read from this
@@ -12293,7 +12293,7 @@ function annotate(fn) {
  * operator and supplies all of the arguments to the constructor function as specified by the
  * constructor annotation.
  *
- * @param {function} Type Annotated constructor function.
+ * @param {Function} Type Annotated constructor function.
  * @param {Object=} locals Optional object. If preset then any argument names are read from this
  * object first, before the `$injector` is consulted.
  * @returns {Object} new instance of `Type`.
@@ -12373,7 +12373,7 @@ function annotate(fn) {
  *    ).toEqual(['$compile', '$rootScope']);
  * ```
  *
- * @param {function|Array.<string|Function>} fn Function for which dependent service names need to
+ * @param {Function|Array.<string|Function>} fn Function for which dependent service names need to
  * be retrieved as described above.
  *
  * @returns {Array.<string>} The names of the services which the function requires.
@@ -12415,7 +12415,7 @@ function annotate(fn) {
  * * {@link auto.$provide#factory factory(fn)} - registers a service **factory function**, `fn`,
  *     that will be wrapped in a **service provider** object, whose `$get` property will contain the
  *     given factory function.
- * * {@link auto.$provide#service service(class)} - registers a **constructor function**, `class` that
+ * * {@link auto.$provide#service service(class)} - registers a **constructor function**, `class`
  *     that will be wrapped in a **service provider** object, whose `$get` property will instantiate
  *      a new object using the given constructor function.
  *
@@ -13044,7 +13044,7 @@ var $AnimateProvider = ['$provide', function($provide) {
    * ```
    *
    * @param {string} name The name of the animation.
-   * @param {function} factory The factory function that will be executed to return the animation
+   * @param {Function} factory The factory function that will be executed to return the animation
    *                           object.
    */
   this.register = function(name, factory) {
@@ -13113,7 +13113,7 @@ var $AnimateProvider = ['$provide', function($provide) {
        *   a child (if the after element is not present)
        * @param {DOMElement} after the sibling element which will append the element
        *   after itself
-       * @param {function=} done callback function that will be called after the element has been
+       * @param {Function=} done callback function that will be called after the element has been
        *   inserted into the DOM
        */
       enter : function(element, parent, after, done) {
@@ -13136,7 +13136,7 @@ var $AnimateProvider = ['$provide', function($provide) {
        * @description Removes the element from the DOM. Once complete, the done() callback will be
        *   fired (if provided).
        * @param {DOMElement} element the element which will be removed from the DOM
-       * @param {function=} done callback function that will be called after the element has been
+       * @param {Function=} done callback function that will be called after the element has been
        *   removed from the DOM
        */
       leave : function(element, done) {
@@ -13159,7 +13159,7 @@ var $AnimateProvider = ['$provide', function($provide) {
        *   inserted into (if the after element is not present)
        * @param {DOMElement} after the sibling element where the element will be
        *   positioned next to
-       * @param {function=} done the callback function (if provided) that will be fired after the
+       * @param {Function=} done the callback function (if provided) that will be fired after the
        *   element has been moved to its new position
        */
       move : function(element, parent, after, done) {
@@ -13178,7 +13178,7 @@ var $AnimateProvider = ['$provide', function($provide) {
        * @param {DOMElement} element the element which will have the className value
        *   added to it
        * @param {string} className the CSS class which will be added to the element
-       * @param {function=} done the callback function (if provided) that will be fired after the
+       * @param {Function=} done the callback function (if provided) that will be fired after the
        *   className value has been added to the element
        */
       addClass : function(element, className, done) {
@@ -13201,7 +13201,7 @@ var $AnimateProvider = ['$provide', function($provide) {
        * @param {DOMElement} element the element which will have the className value
        *   removed from it
        * @param {string} className the CSS class which will be removed from the element
-       * @param {function=} done the callback function (if provided) that will be fired after the
+       * @param {Function=} done the callback function (if provided) that will be fired after the
        *   className value has been removed from the element
        */
       removeClass : function(element, className, done) {
@@ -13225,7 +13225,7 @@ var $AnimateProvider = ['$provide', function($provide) {
        *   removed from it
        * @param {string} add the CSS classes which will be added to the element
        * @param {string} remove the CSS class which will be removed from the element
-       * @param {function=} done the callback function (if provided) that will be fired after the
+       * @param {Function=} done the callback function (if provided) that will be fired after the
        *   CSS classes have been set on the element
        */
       setClass : function(element, add, remove, done) {
@@ -13496,7 +13496,7 @@ function Browser(window, document, $log, $sniffer) {
    * Returns current <base href>
    * (always relative - without domain)
    *
-   * @returns {string=} current <base href>
+   * @returns {string} The current base href
    */
   self.baseHref = function() {
     var href = baseElement.attr('href');
@@ -14324,10 +14324,10 @@ function $TemplateCacheProvider() {
  *
  *
  * @param {string|DOMElement} element Element or HTML string to compile into a template function.
- * @param {function(angular.Scope[, cloneAttachFn]} transclude function available to directives.
+ * @param {function(angular.Scope, cloneAttachFn=)} transclude function available to directives.
  * @param {number} maxPriority only apply directives lower then given priority (Only effects the
  *                 root element(s), not their children)
- * @returns {function(scope[, cloneAttachFn])} a link function which is used to bind template
+ * @returns {function(scope, cloneAttachFn=)} a link function which is used to bind template
  * (a DOM element/tree) to a scope. Where:
  *
  *  * `scope` - A {@link ng.$rootScope.Scope Scope} to bind to.
@@ -14405,7 +14405,7 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
    * @param {string|Object} name Name of the directive in camel-case (i.e. <code>ngBind</code> which
    *    will match as <code>ng-bind</code>), or an object map of directives where the keys are the
    *    names and the values are the factories.
-   * @param {function|Array} directiveFactory An injectable directive factory function. See
+   * @param {Function|Array} directiveFactory An injectable directive factory function. See
    *    {@link guide/directive} for more info.
    * @returns {ng.$compileProvider} Self for chaining.
    */
@@ -14752,13 +14752,13 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
      * function, which is the a linking function for the node.
      *
      * @param {NodeList} nodeList an array of nodes or NodeList to compile
-     * @param {function(angular.Scope[, cloneAttachFn]} transcludeFn A linking function, where the
+     * @param {function(angular.Scope, cloneAttachFn=)} transcludeFn A linking function, where the
      *        scope argument is auto-generated to the new child of the transcluded parent scope.
      * @param {DOMElement=} $rootElement If the nodeList is the root of the compilation tree then
      *        the rootElement must be set the jqLite collection of the compile root. This is
      *        needed so that the jqLite collection items can be replaced with widgets.
      * @param {number=} maxPriority Max directive priority.
-     * @returns {?function} A composite linking function of all of the matched directives or null.
+     * @returns {Function} A composite linking function of all of the matched directives or null.
      */
     function compileNodes(nodeList, transcludeFn, $rootElement, maxPriority, ignoreDirective,
                             previousCompileContext) {
@@ -15002,7 +15002,7 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
      *        this needs to be pre-sorted by priority order.
      * @param {Node} compileNode The raw DOM node to apply the compile functions to
      * @param {Object} templateAttrs The shared attribute function
-     * @param {function(angular.Scope[, cloneAttachFn]} transcludeFn A linking function, where the
+     * @param {function(angular.Scope, cloneAttachFn=)} transcludeFn A linking function, where the
      *                                                  scope argument is auto-generated to the new
      *                                                  child of the transcluded parent scope.
      * @param {JQLite} jqCollection If we are working on the root of the compile tree then this
@@ -15014,7 +15014,7 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
      * @param {Array.<Function>} postLinkFns
      * @param {Object} previousCompileContext Context used for previous compilation of the current
      *                                        node
-     * @returns linkFn
+     * @returns {Function} linkFn
      */
     function applyDirectivesToNode(directives, compileNode, templateAttrs, transcludeFn,
                                    jqCollection, originalReplaceDirective, preLinkFns, postLinkFns,
@@ -15460,7 +15460,7 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
      *   * `A': attribute
      *   * `C`: class
      *   * `M`: comment
-     * @returns true if directive was added.
+     * @returns {boolean} true if directive was added.
      */
     function addDirective(tDirectives, name, location, maxPriority, ignoreDirective, startAttrName,
                           endAttrName) {
@@ -16122,7 +16122,7 @@ function headersGetter(headers) {
  *
  * @param {*} data Data to transform.
  * @param {function(string=)} headers Http headers getter fn.
- * @param {(function|Array.<function>)} fns Function or an array of functions.
+ * @param {(Function|Array.<Function>)} fns Function or an array of functions.
  * @returns {*} Transformed data.
  */
 function transformData(data, headers, fns) {
@@ -17559,93 +17559,93 @@ function $IntervalProvider() {
       * @returns {promise} A promise which will be notified on each iteration.
       *
       * @example
-      <example module="time">
-        <file name="index.html">
-          <script>
-            function Ctrl2($scope,$interval) {
-              $scope.format = 'M/d/yy h:mm:ss a';
-              $scope.blood_1 = 100;
-              $scope.blood_2 = 120;
-
-              var stop;
-              $scope.fight = function() {
-                // Don't start a new fight if we are already fighting
-                if ( angular.isDefined(stop) ) return;
-
-                stop = $interval(function() {
-                  if ($scope.blood_1 > 0 && $scope.blood_2 > 0) {
-                      $scope.blood_1 = $scope.blood_1 - 3;
-                      $scope.blood_2 = $scope.blood_2 - 4;
-                  } else {
-                      $scope.stopFight();
-                  }
-                }, 100);
-              };
-
-              $scope.stopFight = function() {
-                if (angular.isDefined(stop)) {
-                  $interval.cancel(stop);
-                  stop = undefined;
-                }
-              };
-
-              $scope.resetFight = function() {
-                $scope.blood_1 = 100;
-                $scope.blood_2 = 120;
-              }
-
-              $scope.$on('$destroy', function() {
-                // Make sure that the interval is destroyed too
-                $scope.stopFight();
-              });
-            }
-
-            angular.module('time', [])
-              // Register the 'myCurrentTime' directive factory method.
-              // We inject $interval and dateFilter service since the factory method is DI.
-              .directive('myCurrentTime', function($interval, dateFilter) {
-                // return the directive link function. (compile function not needed)
-                return function(scope, element, attrs) {
-                  var format,  // date format
-                  stopTime; // so that we can cancel the time updates
-
-                  // used to update the UI
-                  function updateTime() {
-                    element.text(dateFilter(new Date(), format));
-                  }
-
-                  // watch the expression, and update the UI on change.
-                  scope.$watch(attrs.myCurrentTime, function(value) {
-                    format = value;
-                    updateTime();
-                  });
-
-                  stopTime = $interval(updateTime, 1000);
-
-                  // listen on DOM destroy (removal) event, and cancel the next UI update
-                  // to prevent updating time ofter the DOM element was removed.
-                  element.bind('$destroy', function() {
-                    $interval.cancel(stopTime);
-                  });
-                }
-              });
-          </script>
-
-          <div>
-            <div ng-controller="Ctrl2">
-              Date format: <input ng-model="format"> <hr/>
-              Current time is: <span my-current-time="format"></span>
-              <hr/>
-              Blood 1 : <font color='red'>{{blood_1}}</font>
-              Blood 2 : <font color='red'>{{blood_2}}</font>
-              <button type="button" data-ng-click="fight()">Fight</button>
-              <button type="button" data-ng-click="stopFight()">StopFight</button>
-              <button type="button" data-ng-click="resetFight()">resetFight</button>
-            </div>
-          </div>
-
-        </file>
-      </example>
+      * <example module="time">
+      *   <file name="index.html">
+      *     <script>
+      *       function Ctrl2($scope,$interval) {
+      *         $scope.format = 'M/d/yy h:mm:ss a';
+      *         $scope.blood_1 = 100;
+      *         $scope.blood_2 = 120;
+      *
+      *         var stop;
+      *         $scope.fight = function() {
+      *           // Don't start a new fight if we are already fighting
+      *           if ( angular.isDefined(stop) ) return;
+      *
+      *           stop = $interval(function() {
+      *             if ($scope.blood_1 > 0 && $scope.blood_2 > 0) {
+      *                 $scope.blood_1 = $scope.blood_1 - 3;
+      *                 $scope.blood_2 = $scope.blood_2 - 4;
+      *             } else {
+      *                 $scope.stopFight();
+      *             }
+      *           }, 100);
+      *         };
+      *
+      *         $scope.stopFight = function() {
+      *           if (angular.isDefined(stop)) {
+      *             $interval.cancel(stop);
+      *             stop = undefined;
+      *           }
+      *         };
+      *
+      *         $scope.resetFight = function() {
+      *           $scope.blood_1 = 100;
+      *           $scope.blood_2 = 120;
+      *         }
+      *
+      *         $scope.$on('$destroy', function() {
+      *           // Make sure that the interval is destroyed too
+      *           $scope.stopFight();
+      *         });
+      *       }
+      *
+      *       angular.module('time', [])
+      *         // Register the 'myCurrentTime' directive factory method.
+      *         // We inject $interval and dateFilter service since the factory method is DI.
+      *         .directive('myCurrentTime', function($interval, dateFilter) {
+      *           // return the directive link function. (compile function not needed)
+      *           return function(scope, element, attrs) {
+      *             var format,  // date format
+      *             stopTime; // so that we can cancel the time updates
+      *
+      *             // used to update the UI
+      *             function updateTime() {
+      *               element.text(dateFilter(new Date(), format));
+      *             }
+      *
+      *             // watch the expression, and update the UI on change.
+      *             scope.$watch(attrs.myCurrentTime, function(value) {
+      *               format = value;
+      *               updateTime();
+      *             });
+      *
+      *             stopTime = $interval(updateTime, 1000);
+      *
+      *             // listen on DOM destroy (removal) event, and cancel the next UI update
+      *             // to prevent updating time ofter the DOM element was removed.
+      *             element.bind('$destroy', function() {
+      *               $interval.cancel(stopTime);
+      *             });
+      *           }
+      *         });
+      *     </script>
+      *
+      *     <div>
+      *       <div ng-controller="Ctrl2">
+      *         Date format: <input ng-model="format"> <hr/>
+      *         Current time is: <span my-current-time="format"></span>
+      *         <hr/>
+      *         Blood 1 : <font color='red'>{{blood_1}}</font>
+      *         Blood 2 : <font color='red'>{{blood_2}}</font>
+      *         <button type="button" data-ng-click="fight()">Fight</button>
+      *         <button type="button" data-ng-click="stopFight()">StopFight</button>
+      *         <button type="button" data-ng-click="resetFight()">resetFight</button>
+      *       </div>
+      *     </div>
+      *
+      *   </file>
+      * </example>
       */
     function interval(fn, delay, count, invokeApply) {
       var setInterval = $window.setInterval,
@@ -17952,11 +17952,6 @@ function LocationHashbangUrl(appBase, hashPrefix) {
       throw $locationMinErr('ihshprfx', 'Invalid url "{0}", missing hash prefix "{1}".', url,
           hashPrefix);
     }
-
-    if (withoutHashUrl === '' && withoutBaseUrl.charAt(0) === '?') {
-      withoutHashUrl = withoutBaseUrl;
-    }
-
     parseAppUrl(withoutHashUrl, this, appBase);
 
     this.$$path = removeWindowsDriveName(this.$$path, withoutHashUrl, appBase);
@@ -18007,14 +18002,10 @@ function LocationHashbangUrl(appBase, hashPrefix) {
    */
   this.$$compose = function() {
     var search = toKeyValue(this.$$search),
-        hash = this.$$hash ? '#' + encodeUriSegment(this.$$hash) : '',
-        url = '';
+        hash = this.$$hash ? '#' + encodeUriSegment(this.$$hash) : '';
 
     this.$$url = encodePath(this.$$path) + (search ? '?' + search : '') + hash;
-    if (this.$$url) {
-      url = this.$$path ? hashPrefix + this.$$url : this.$$url;
-    }
-    this.$$absUrl = appBase + url;
+    this.$$absUrl = appBase + (this.$$url ? hashPrefix + this.$$url : '');
   };
 
   this.$$rewrite = function(url) {
@@ -19420,6 +19411,10 @@ Parser.prototype = {
     var allConstant = true;
     if (this.peekToken().text !== ']') {
       do {
+        if (this.peek(']')) {
+          // Support trailing commas per ES5.1.
+          break;
+        }
         var elementFn = this.expression();
         elementFns.push(elementFn);
         if (!elementFn.constant) {
@@ -19446,6 +19441,10 @@ Parser.prototype = {
     var allConstant = true;
     if (this.peekToken().text !== '}') {
       do {
+        if (this.peek('}')) {
+          // Support trailing commas per ES5.1.
+          break;
+        }
         var token = this.expect(),
         key = token.string || token.text;
         this.consume(':');
@@ -20081,7 +20080,7 @@ function $QProvider() {
 /**
  * Constructs a promise manager.
  *
- * @param {function(function)} nextTick Function for executing functions in the next turn.
+ * @param {function(Function)} nextTick Function for executing functions in the next turn.
  * @param {function(...*)} exceptionHandler Function into which unexpected exceptions are passed for
  *     debugging purposes.
  * @returns {object} Promise manager.
@@ -20839,7 +20838,7 @@ function $RootScopeProvider(){
        * ```
        *
        *
-       * @param {string|Function(scope)} obj Evaluated as {@link guide/expression expression}. The
+       * @param {string|function(scope)} obj Evaluated as {@link guide/expression expression}. The
        *    expression value should evaluate to an object or an array which is observed on each
        *    {@link ng.$rootScope.Scope#$digest $digest} cycle. Any shallow change within the
        *    collection will trigger a call to the `listener`.
@@ -23029,7 +23028,7 @@ function $WindowProvider(){
  * Register filter factory function.
  *
  * @param {String} name Name of the filter.
- * @param {function} fn The filter factory function which is injectable.
+ * @param {Function} fn The filter factory function which is injectable.
  */
 
 
@@ -27706,7 +27705,7 @@ var ngIfDirective = ['$animate', function($animate) {
     restrict: 'A',
     $$tlb: true,
     link: function ($scope, $element, $attr, ctrl, $transclude) {
-        var block, childScope;
+        var block, childScope, previousElements;
         $scope.$watch($attr.ngIf, function ngIfWatchAction(value) {
 
           if (toBoolean(value)) {
@@ -27724,14 +27723,19 @@ var ngIfDirective = ['$animate', function($animate) {
               });
             }
           } else {
-
-            if (childScope) {
+            if(previousElements) {
+              previousElements.remove();
+              previousElements = null;
+            }
+            if(childScope) {
               childScope.$destroy();
               childScope = null;
             }
-
-            if (block) {
-              $animate.leave(getBlockElements(block.clone));
+            if(block) {
+              previousElements = getBlockElements(block.clone);
+              $animate.leave(previousElements, function() {
+                previousElements = null;
+              });
               block = null;
             }
           }
@@ -27917,15 +27921,23 @@ var ngIncludeDirective = ['$http', '$templateCache', '$anchorScroll', '$animate'
       return function(scope, $element, $attr, ctrl, $transclude) {
         var changeCounter = 0,
             currentScope,
+            previousElement,
             currentElement;
 
         var cleanupLastIncludeContent = function() {
-          if (currentScope) {
+          if(previousElement) {
+            previousElement.remove();
+            previousElement = null;
+          }
+          if(currentScope) {
             currentScope.$destroy();
             currentScope = null;
           }
           if(currentElement) {
-            $animate.leave(currentElement);
+            $animate.leave(currentElement, function() {
+              previousElement = null;
+            });
+            previousElement = currentElement;
             currentElement = null;
           }
         };
@@ -29206,12 +29218,31 @@ var ngSwitchDirective = ['$animate', function($animate) {
       var watchExpr = attr.ngSwitch || attr.on,
           selectedTranscludes,
           selectedElements,
+          previousElements,
           selectedScopes = [];
 
       scope.$watch(watchExpr, function ngSwitchWatchAction(value) {
-        for (var i= 0, ii=selectedScopes.length; i<ii; i++) {
-          selectedScopes[i].$destroy();
-          $animate.leave(selectedElements[i]);
+        var i, ii = selectedScopes.length;
+        if(ii > 0) {
+          if(previousElements) {
+            for (i = 0; i < ii; i++) {
+              previousElements[i].remove();
+            }
+            previousElements = null;
+          }
+
+          previousElements = [];
+          for (i= 0; i<ii; i++) {
+            var selected = selectedElements[i];
+            selectedScopes[i].$destroy();
+            previousElements[i] = selected;
+            $animate.leave(selected, function() {
+              previousElements.splice(i, 1);
+              if(previousElements.length === 0) {
+                previousElements = null;
+              }
+            });
+          }
         }
 
         selectedElements = [];
@@ -30025,7 +30056,7 @@ var styleDirective = valueFn({
 
 !angular.$$csp() && angular.element(document).find('head').prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide{display:none !important;}ng\\:form{display:block;}.ng-animate-block-transitions{transition:0s all!important;-webkit-transition:0s all!important;}</style>');
 /**
- * @license AngularJS v1.2.14-build.2323+sha.c99dd22
+ * @license AngularJS v1.2.14-build.2337+sha.214c65d
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -30468,8 +30499,7 @@ angular.module('ngAnimate', ['ng'])
           cancelChildAnimations(element);
           this.enabled(false, element);
           $rootScope.$$postDigest(function() {
-            element = stripCommentsFromElement(element);
-            performAnimation('leave', 'ng-leave', element, null, null, function() {
+            performAnimation('leave', 'ng-leave', stripCommentsFromElement(element), null, null, function() {
               $delegate.leave(element);
             }, doneCallback);
           });
@@ -30599,7 +30629,7 @@ angular.module('ngAnimate', ['ng'])
            *   removed from it
            * @param {string} add the CSS classes which will be added to the element
            * @param {string} remove the CSS class which will be removed from the element
-           * @param {function=} done the callback function (if provided) that will be fired after the
+           * @param {Function=} done the callback function (if provided) that will be fired after the
            *   CSS classes have been set on the element
            */
         setClass : function(element, add, remove, doneCallback) {
@@ -30615,7 +30645,7 @@ angular.module('ngAnimate', ['ng'])
          * @function
          *
          * @param {boolean=} value If provided then set the animation on or off.
-         * @param {jQuery/jqLite element=} element If provided then the element will be used to represent the enable/disable operation
+         * @param {DOMElement=} element If provided then the element will be used to represent the enable/disable operation
          * @return {boolean} Current animation state.
          *
          * @description
@@ -30796,6 +30826,27 @@ angular.module('ngAnimate', ['ng'])
           return;
         }
 
+        if(animationEvent == 'leave') {
+          //there's no need to ever remove the listener since the element
+          //will be removed (destroyed) after the leave animation ends or
+          //is cancelled midway
+          element.one('$destroy', function(e) {
+            var element = angular.element(this);
+            var state = element.data(NG_ANIMATE_STATE) || {};
+            var activeLeaveAnimation = state.active['ng-leave'];
+            if(activeLeaveAnimation) {
+              var animations = activeLeaveAnimation.animations;
+
+              //if the before animation is completed then the element will be
+              //removed shortly after so there is no need to cancel the animation
+              if(!animations[0].beforeComplete) {
+                cancelAnimations(animations);
+                cleanup(element, 'ng-leave');
+              }
+            }
+          });
+        }
+
         //the ng-animate class does nothing, but it's here to allow for
         //parent animations to find and cancel child animations when needed
         element.addClass(NG_ANIMATE_CLASS_NAME);
@@ -30953,16 +31004,21 @@ angular.module('ngAnimate', ['ng'])
 
       function cancelChildAnimations(element) {
         var node = extractElementNode(element);
-        forEach(node.querySelectorAll('.' + NG_ANIMATE_CLASS_NAME), function(element) {
-          element = angular.element(element);
-          var data = element.data(NG_ANIMATE_STATE);
-          if(data && data.active) {
-            angular.forEach(data.active, function(operation) {
-              (operation.done || noop)(true);
-              cancelAnimations(operation.animations);
-            });
-          }
-        });
+        if (node) {
+          var nodes = angular.isFunction(node.getElementsByClassName) ?
+            node.getElementsByClassName(NG_ANIMATE_CLASS_NAME) :
+            node.querySelectorAll('.' + NG_ANIMATE_CLASS_NAME);
+          forEach(nodes, function(element) {
+            element = angular.element(element);
+            var data = element.data(NG_ANIMATE_STATE);
+            if(data && data.active) {
+              angular.forEach(data.active, function(operation) {
+                (operation.done || noop)(true);
+                cancelAnimations(operation.animations);
+              });
+            }
+          });
+        }
       }
 
       function cancelAnimations(animations) {
@@ -31095,16 +31151,21 @@ angular.module('ngAnimate', ['ng'])
       var closingTimestamp = 0;
       var animationElementQueue = [];
       function animationCloseHandler(element, totalTime) {
+        var node = extractElementNode(element);
+        element = angular.element(node);
+
+        //this item will be garbage collected by the closing
+        //animation timeout
+        animationElementQueue.push(element);
+
+        //but it may not need to cancel out the existing timeout
+        //if the timestamp is less than the previous one
         var futureTimestamp = Date.now() + (totalTime * 1000);
         if(futureTimestamp <= closingTimestamp) {
           return;
         }
 
         $timeout.cancel(closingTimer);
-
-        var node = extractElementNode(element);
-        element = angular.element(node);
-        animationElementQueue.push(element);
 
         closingTimestamp = futureTimestamp;
         closingTimer = $timeout(function() {
@@ -31253,7 +31314,14 @@ angular.module('ngAnimate', ['ng'])
         if(transitionDuration > 0) {
           blockTransitions(element, className, isCurrentlyAnimating);
         }
-        if(animationDuration > 0) {
+
+        //staggering keyframe animations work by adjusting the `animation-delay` CSS property
+        //on the given element, however, the delay value can only calculated after the reflow
+        //since by that time $animate knows how many elements are being animated. Therefore,
+        //until the reflow occurs the element needs to be blocked (where the keyframe animation
+        //is set to `none 0s`). This blocking mechanism should only be set for when a stagger
+        //animation is detected and when the element item index is greater than 0.
+        if(animationDuration > 0 && stagger.animationDelay > 0 && stagger.animationDuration === 0) {
           blockKeyframeAnimations(element);
         }
 
@@ -47135,7 +47203,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
 *
 * Phaser - http://www.phaser.io
 *
-* v1.1.5 - Built at: Wed Feb 12 2014 15:32:36
+* v1.1.6 - Built at: Mon Feb 24 2014 21:36:31
 *
 * By Richard Davey http://www.photonstorm.com @photonstorm
 *
@@ -47174,8 +47242,8 @@ var PIXI = PIXI || {};
 */
 var Phaser = Phaser || {
 
-	VERSION: '1.1.5',
-	DEV_VERSION: '1.1.5',
+	VERSION: '1.1.6',
+	DEV_VERSION: '1.1.6',
 	GAMES: [],
 
 	AUTO: 0,
@@ -59042,11 +59110,11 @@ Phaser.Group.prototype = {
     },
 
     /**
-    * Allows you to call your own function on each alive member of this Group (where child.alive=true). You must pass the callback and context in which it will run.
+    * Allows you to call your own function on each existing member of this Group (where child.exists=true). You must pass the callback and context in which it will run.
     * You can add as many parameters as you like, which will all be passed to the callback along with the child.
-    * For example: Group.forEachAlive(causeDamage, this, 500)
+    * For example: Group.forEachExists(causeDamage, this, 500)
     * 
-    * @method Phaser.Group#forEachAlive
+    * @method Phaser.Group#forEachExists
     * @param {function} callback - The function that will be called. Each child of the Group will be passed to it as its first parameter.
     * @param {Object} callbackContext - The context in which the function should be called (usually 'this').
     */
@@ -59710,7 +59778,7 @@ Phaser.World.prototype.boot = function () {
 * This is called automatically after the plugins preUpdate and before the State.update.
 * Most objects have preUpdate methods and it's where initial movement, drawing and calculations are done.
 * 
-* @method Phaser.World#update
+* @method Phaser.World#preUpdate
 */
 Phaser.World.prototype.preUpdate = function () {
     
@@ -61737,7 +61805,7 @@ Phaser.Key.prototype = {
 
     /**
     * Returns the "just released" state of the Key. Just released is considered as being true if the key was released within the duration given (default 250ms)
-    * @method Phaser.Key#justPressed
+    * @method Phaser.Key#justReleased
     * @param {number} [duration=250] - The duration below which the key is considered as being just released.
     * @return {boolean} True if the key is just released otherwise false.
     */
@@ -64245,7 +64313,7 @@ Phaser.InputHandler.prototype = {
 
     /**
     * Is this sprite being dragged by the mouse or not?
-    * @method Phaser.InputHandler#pointerTimeOut
+    * @method Phaser.InputHandler#pointerDragged
     * @param {Phaser.Pointer} pointer
     * @return {number}
     */
@@ -65648,7 +65716,7 @@ Phaser.SinglePad.prototype = {
 
     /**
     * Add callbacks to the this Gamepad to handle connect/disconnect/button down/button up/axis change/float value buttons
-    * @method Phaser.Gamepad#addCallbacks
+    * @method Phaser.SinglePad#addCallbacks
     * @param {Object} context - The context under which the callbacks are run.
     * @param {Object} callbacks - Object that takes six different callbak methods:
     * onConnectCallback, onDisconnectCallback, onDownCallback, onUpCallback, onAxisCallback, onFloatCallback
@@ -69633,7 +69701,7 @@ Phaser.BitmapText.prototype.update = function() {
 }
 
 /**
-* @method Phaser.Text.prototype.destroy
+* @method Phaser.BitmapText.prototype.destroy
 */
 Phaser.BitmapText.prototype.destroy = function() {
 
@@ -70188,7 +70256,7 @@ Phaser.Button.prototype.onInputOverHandler = function (sprite, pointer) {
 * Internal function that handles input events.
 *
 * @protected
-* @method Phaser.Button.prototype.onInputOverHandler
+* @method Phaser.Button.prototype.onInputOutHandler
 * @param {Phaser.Button} sprite - The Button that the event occured on.
 * @param {Phaser.Pointer} pointer - The Pointer that activated the Button.
 */
@@ -70214,7 +70282,7 @@ Phaser.Button.prototype.onInputOutHandler = function (sprite, pointer) {
 * Internal function that handles input events.
 *
 * @protected
-* @method Phaser.Button.prototype.onInputOverHandler
+* @method Phaser.Button.prototype.onInputDownHandler
 * @param {Phaser.Button} sprite - The Button that the event occured on.
 * @param {Phaser.Pointer} pointer - The Pointer that activated the Button.
 */
@@ -70240,7 +70308,7 @@ Phaser.Button.prototype.onInputDownHandler = function (sprite, pointer) {
 * Internal function that handles input events.
 *
 * @protected
-* @method Phaser.Button.prototype.onInputOverHandler
+* @method Phaser.Button.prototype.onInputUpHandler
 * @param {Phaser.Button} sprite - The Button that the event occured on.
 * @param {Phaser.Pointer} pointer - The Pointer that activated the Button.
 */
@@ -70385,7 +70453,7 @@ Phaser.Graphics.prototype.constructor = Phaser.Graphics;
 /**
 * Destroy this Graphics instance.
 * 
-* @method Phaser.Sprite.prototype.destroy
+* @method Phaser.Graphics.prototype.destroy
 */
 Phaser.Graphics.prototype.destroy = function() {
 
@@ -72673,7 +72741,7 @@ Phaser.RequestAnimationFrame.prototype = {
     * @return {boolean}
     */
     isSetTimeOut: function () {
-        return true;
+        return this._isSetTimeOut;
     },
 
     /**
@@ -72973,7 +73041,7 @@ Phaser.Math = {
 
     /**
     * a is fuzzyLessThan b if it is less than b + &epsilon;. 
-    * @method Phaser.Math#fuzzyEqual
+    * @method Phaser.Math#fuzzyLessThan
     * @param {number} a
     * @param {number} b
     * @param {number} epsilon 
@@ -75270,7 +75338,7 @@ Phaser.Point.prototype = {
 
     /**
     * Alters the length of the vector without changing the direction
-    * @method Phaser.Point#getMagnitude
+    * @method Phaser.Point#setMagnitude
     * @param {number} magnitude the desired magnitude of the resulting vector
     * @return {Phaser.Point} the modified original vector
     */
@@ -76367,7 +76435,7 @@ Object.defineProperty(Phaser.Line.prototype, "perpSlope", {
 * Returns the intersection segment of AB and EF as a Point, or null if there is no intersection.
 * Adapted from code by Keith Hair
 *
-* @method Phaser.Line.intersects
+* @method Phaser.Line.intersectsPoints
 * @param {Phaser.Point} a - The start of the first Line to be checked.
 * @param {Phaser.Point} b - The end of the first line to be checked.
 * @param {Phaser.Point} e - The start of the second Line to be checked.
@@ -76787,7 +76855,7 @@ Phaser.TweenManager.prototype = {
     /**
     * Pauses all currently running tweens.
     *
-    * @method Phaser.TweenManager#update
+    * @method Phaser.TweenManager#pauseAll
     */
     pauseAll: function () {
 
@@ -76799,7 +76867,7 @@ Phaser.TweenManager.prototype = {
     },
 
     /**
-    * Pauses all currently paused tweens.
+    * Resumes all currently paused tweens.
     *
     * @method Phaser.TweenManager#resumeAll
     */
@@ -81747,6 +81815,22 @@ Phaser.Loader.prototype = {
         return this;
 
     },
+    
+    /**
+    * Add a custom JSON file to the Loader.
+    *
+    * @method Phaser.Loader#json
+    * @param {string} key - Unique asset key of the json file.
+    * @param {string} url - URL of the json file.
+    * @return {Phaser.Loader} This Loader instance.
+    */
+    json: function (key, url) {
+
+        this.addToFileList('json', key, url);
+
+        return this;
+
+    },
 
     /**
     * Add a binary file to the Loader. It will be loaded via xhr with a responseType of "arraybuffer". You can specify an optional callback to process the file after load.
@@ -82205,12 +82289,12 @@ Phaser.Loader.prototype = {
                 }
 
                 break;
-
             case 'tilemap':
+            case 'json':
                 this._xhr.open("GET", this.baseURL + file.url, true);
                 this._xhr.responseType = "text";
 
-                if (file.format === Phaser.Tilemap.TILED_JSON)
+                if (!file.format || file.format === Phaser.Tilemap.TILED_JSON)
                 {
                     this._xhr.onload = function () {
                         return _this.jsonLoadComplete(_this._fileIndex);
@@ -82232,7 +82316,6 @@ Phaser.Loader.prototype = {
                 };
                 this._xhr.send();
                 break;
-
             case 'text':
             case 'script':
                 this._xhr.open("GET", this.baseURL + file.url, true);
@@ -82490,6 +82573,10 @@ Phaser.Loader.prototype = {
         if (file.type === 'tilemap')
         {
             this.game.cache.addTilemap(file.key, file.url, data, file.format);
+        }
+        else if (file.type === 'json')
+        {
+             this.game.cache.addText(file.key, file.url, data);
         }
         else
         {
@@ -86892,14 +86979,8 @@ Phaser.Physics.Arcade.prototype = {
             return;
         }
 
-        if (this._mapData.length > 1)
+        for (var i = 0; i < this._mapData.length; i++)
         {
-            this.separateTiles(sprite.body, this._mapData);
-        }
-        else
-        {
-            var i = 0;
-
             if (this.separateTile(sprite.body, this._mapData[i]))
             {
                 //  They collided, is there a custom process callback?
@@ -86926,6 +87007,8 @@ Phaser.Physics.Arcade.prototype = {
                 }
             }
         }
+
+        return true;
 
     },
 
@@ -87013,7 +87096,7 @@ Phaser.Physics.Arcade.prototype = {
 
         if (a.width <= 0 || a.height <= 0 || b.width <= 0 || b.height <= 0)
         {
-            result = false;
+            return false;
         }
 
         result = !(a.right < b.left || a.bottom < b.top || a.left > b.right || a.top > b.bottom);
@@ -87023,6 +87106,7 @@ Phaser.Physics.Arcade.prototype = {
             a.removeContact(b);
         }
 
+        return result;
     },
 
     /**
@@ -87055,32 +87139,6 @@ Phaser.Physics.Arcade.prototype = {
         this._intersection[4] = 0;
 
         return this._intersection;
-
-    },
-
-    /**
-    * The core separation function to separate a physics body and an array of tiles.
-    * @method Phaser.Physics.Arcade#separateTiles
-    * @param {Phaser.Physics.Arcade.Body} body - The Body object to separate.
-    * @param {array<Phaser.Tile>} tiles - The array of tiles to collide against.
-    * @returns {boolean} Returns true if the body was separated, otherwise false.
-    */
-    separateTiles: function (body, tiles) {
-
-        var tile;
-        var result = false;
-
-        for (var i = 0; i < tiles.length; i++)
-        {
-            tile = tiles[i];
-
-            if (this.separateTile(body, tile))
-            {
-                result = true;
-            }
-        }
-
-        return result;
 
     },
 
@@ -88129,8 +88187,7 @@ Phaser.Physics.Arcade.Body.prototype = {
                 this.speed = 0;
             }
 
-            //  Don't bother if speed 0
-            if (this.speed > 0)
+            if (this.speed > 0 || !this.velocity.isZero())
             {
                 this.velocity.x = Math.cos(this.angle) * this.speed;
                 this.velocity.y = Math.sin(this.angle) * this.speed;
@@ -88281,7 +88338,7 @@ Phaser.Physics.Arcade.Body.prototype = {
 
         if (this.rebound)
         {
-            this.processRebound(body);
+            this.processRebound(body, response.overlapN);
             this.reboundCheck(true, true, false);
             body.reboundCheck(true, true, false);
         }
@@ -88302,7 +88359,7 @@ Phaser.Physics.Arcade.Body.prototype = {
 
         if (this.rebound)
         {
-            this.processRebound(body);
+            this.processRebound(body, response.overlapN);
             this.reboundCheck(true, true, false);
             body.reboundCheck(true, true, false);
         }
@@ -88385,17 +88442,23 @@ Phaser.Physics.Arcade.Body.prototype = {
     * @protected
     * @param {Phaser.Physics.Arcade.Body} body - The Body that collided.
     */
-    processRebound: function (body) {
+    processRebound: function (body, overlapN) {
 
         //  Don't rebound again if they've already rebounded in this frame
         if (!(this._vx <= 0 && this.velocity.x > 0) && !(this._vx >= 0 && this.velocity.x < 0))
         {
-            this.velocity.x = body.velocity.x - this.velocity.x * this.bounce.x;
+            if (overlapN.x != 0)
+            {
+                this.velocity.x = body.velocity.x - this.velocity.x * this.bounce.x;
+            }
         }
 
         if (!(this._vy <= 0 && this.velocity.y > 0) && !(this._vy >= 0 && this.velocity.y < 0))
         {
-            this.velocity.y = body.velocity.y - this.velocity.y * this.bounce.y;
+            if (overlapN.y != 0)
+            {
+                this.velocity.y = body.velocity.y - this.velocity.y * this.bounce.y;
+            }
         }
 
         this.angle = Math.atan2(this.velocity.y, this.velocity.x);
@@ -92658,6 +92721,10 @@ Phaser.TilemapParser = {
             newSet.columns = (set.imagewidth - set.margin) / (set.tilewidth + set.spacing);
             newSet.total = newSet.rows * newSet.columns;
 
+            if (newSet.rows % 1 !== 0 || newSet.columns % 1 !== 0) {
+                console.warn('TileSet image dimensions do not match expected dimensions.');
+            }
+
             tilesets.push(newSet);
         }
 
@@ -93009,27 +93076,32 @@ PIXI.CanvasRenderer.prototype.renderDisplayObject = function(displayObject, rend
         }
         else if (displayObject instanceof PIXI.FilterBlock)
         {
-            if (displayObject.open)
+            if(displayObject.data instanceof PIXI.Graphics)
             {
-                this.context.save();
-                
-                var cacheAlpha = displayObject.mask.alpha;
-                var maskTransform = displayObject.mask.worldTransform;
-                
-                this.context.setTransform(maskTransform[0], maskTransform[3], maskTransform[1], maskTransform[4], maskTransform[2], maskTransform[5])
-                
-                displayObject.mask.worldAlpha = 0.5;
-                
-                this.context.worldAlpha = 0;
-                
-                PIXI.CanvasGraphics.renderGraphicsMask(displayObject.mask, this.context);
-                this.context.clip();
-                
-                displayObject.mask.worldAlpha = cacheAlpha;
-            }
-            else
-            {
-                this.context.restore();
+                var mask = displayObject.data;
+
+                if(displayObject.open)
+                {
+                    this.context.save();
+
+                    var cacheAlpha = mask.alpha;
+                    var maskTransform = mask.worldTransform;
+
+                    this.context.setTransform(maskTransform[0], maskTransform[3], maskTransform[1], maskTransform[4], maskTransform[2], maskTransform[5]);
+
+                    mask.worldAlpha = 0.5;
+
+                    this.context.worldAlpha = 0;
+
+                    PIXI.CanvasGraphics.renderGraphicsMask(mask, this.context);
+                    this.context.clip();
+
+                    mask.worldAlpha = cacheAlpha;
+                }
+                else
+                {
+                    this.context.restore();
+                }
             }
         }
         //  count++

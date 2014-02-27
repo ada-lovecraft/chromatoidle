@@ -3,7 +3,7 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
   console.debug('play state');
   var game = GameService.get();
   var state = new StateFactory();
-  console.debug('scope:', $scope);
+
 
   $rootScope.$on('rescale', state.rescaleAll);
   $scope.livingThings = 0;
@@ -43,44 +43,66 @@ angular.module('app').controller('PlayStateCtrl', function($scope, $rootScope, $
 
   state.update = function() {
     if ($scope.asteroids.countLiving() < GameService.getStat('asteroids')) {
-      var asteroid = new Asteroid();
-      $scope.asteroids.add(asteroid);
+      var asteroid = $scope.asteroids.getFirstDead();
+      if(!asteroid) {
+        asteroid = new Asteroid();
+        $scope.asteroids.add(asteroid);
+      } else {
+        asteroid.revive();
+      }
+
     }
 
     if($scope.miners.countLiving() < GameService.getStat('miners')) {
-      var miner = new Miner();
-      $scope.miners.add(miner);
+      var miner = $scope.miners.getFirstDead();
+      if(!miner){
+        miner = new Miner();
+        $scope.miners.add(miner);
+      } else {
+        miner.revive();
+      }
     }
 
     if($scope.defenders.countLiving() < GameService.getStat('defenders')) {
-      var defender = new Defender();
-      $scope.defenders.add(defender);
+      var defender = $scope.defenders.getFirstDead();
+      if(!defender) {
+        defender = new Defender();
+        $scope.defenders.add(defender);
+      } else {
+        defender.revive();
+      }
+      
     }
     /*
     if(game.rnd.integer() % 100 === 0) {
       var enemyMiner = new Miner(true);
       $scope.enemyMiners.add(enemyMiner);
     }*/
+    
     if($scope.enemyMiners.countLiving() < 1) {
-      var enemyMiner = new Miner(true);
-      $scope.enemyMiners.add(enemyMiner);
+      var enemyMiner = $scope.enemyMiners.getFirstDead();
+      if(!enemyMiner) {
+        enemyMiner = new Miner(true);
+        $scope.enemyMiners.add(enemyMiner);
+      } else {
+        enemyMiner.revive();
+      }
     }
 
     $scope.maxLivingThings = GameService.getStat('asteroids') + GameService.getStat('miners');
+    /*
     var newScale = (1000 - $scope.maxLivingThings) / 2750 ;
     GameService.setStat('globalScale', 0, newScale);
+    */
 
     game.physics.collide($scope.enemyMiners, $scope.bullets, state.destroyEnemyHandler);
-    
+
   };
 
   state.render = function() {
 
   };
 
-  state.rescaleAll = function(evt, newScale) {
-    $scope.world.scale.setTo(newScale, newScale);
-  };
   state.destroyEnemyHandler = function(enemy, bullet) {
     enemy.kill();
     bullet.kill();

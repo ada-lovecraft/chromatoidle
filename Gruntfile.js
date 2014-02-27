@@ -15,7 +15,7 @@ module.exports = function(grunt) {
         dest: 'dist/js/app.js'
       },
       styles: {
-        src: ['bower_components/**/*.css', '!bower_components/jquery-ui/**/*.css', '!bower_components/jquery/**/*.css','vendor/**/*.css', 'tmp/styles/**/*.css'],
+        src: ['bower_components/**/*.css', '!bower_components/phaser/**/*.css','!bower_components/jquery-ui/**/*.css', '!bower_components/jquery/**/*.css','vendor/**/*.css', 'tmp/styles/**/*.css'],
         dest: 'dist/css/app.css'
       }
     },
@@ -86,7 +86,7 @@ module.exports = function(grunt) {
         force: true  
       },
       refresh: {
-        build: ['./lib','./tmp','./dist', './bower_components'],
+        build: ['./lib','./tmp','./dist'],
         force: true
       }
     },
@@ -130,7 +130,7 @@ module.exports = function(grunt) {
           layout: 'byComponent',
           install: true,
           verbose: true,
-          cleanTargetDir: true,
+          cleanTargetDir: false,
           cleanBowerDir: false,
           bowerOptions: {}
         }

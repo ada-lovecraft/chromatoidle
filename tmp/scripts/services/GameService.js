@@ -14,8 +14,14 @@ angular.module('app').service('GameService', function($log, $rootScope,$timeout,
       return game;
     },
     init: function(selector) {
-      game = new Phaser.Game(800, 600, Phaser.AUTO, selector);
-      game.config = { forceSetTimeout: true } ;
+      var config = {
+        width: 800,
+        height: 600,
+        parent: selector,
+        antialias: true,
+        forceSetTimeout: true
+      };
+      game = new Phaser.Game(config);
       $log.debug('game instantiated:', game);
     },
     addState: function(stateName, controllerName, scope) {
@@ -54,6 +60,27 @@ angular.module('app').service('GameService', function($log, $rootScope,$timeout,
       amount = amount || 1;
       stats[stat].level = 0;
       stats[stat].value += amount;
+    },
+    setStartPosition: function(obj) {
+      var coin = game.rnd.integer() % 4;
+      switch(coin) {
+      case 0:
+        obj.x = -32;
+        obj.y = game.world.randomY;
+        break;
+      case 1:
+        obj.x = game.world.width + 32;
+        obj.y = game.world.randomY;
+        break;
+      case 2:
+        obj.x = game.world.randomX;
+        obj.y = -32;
+        break;
+      case 3:
+        obj.x = game.world.randomX;
+        obj.y = game.world.height + 32;
+        break;
+      }
     }
   };
 });

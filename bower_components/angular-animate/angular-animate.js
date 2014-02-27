@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.2.14-build.2323+sha.c99dd22
+ * @license AngularJS v1.2.14-build.2337+sha.214c65d
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -442,8 +442,7 @@ angular.module('ngAnimate', ['ng'])
           cancelChildAnimations(element);
           this.enabled(false, element);
           $rootScope.$$postDigest(function() {
-            element = stripCommentsFromElement(element);
-            performAnimation('leave', 'ng-leave', element, null, null, function() {
+            performAnimation('leave', 'ng-leave', stripCommentsFromElement(element), null, null, function() {
               $delegate.leave(element);
             }, doneCallback);
           });
@@ -573,7 +572,7 @@ angular.module('ngAnimate', ['ng'])
            *   removed from it
            * @param {string} add the CSS classes which will be added to the element
            * @param {string} remove the CSS class which will be removed from the element
-           * @param {function=} done the callback function (if provided) that will be fired after the
+           * @param {Function=} done the callback function (if provided) that will be fired after the
            *   CSS classes have been set on the element
            */
         setClass : function(element, add, remove, doneCallback) {
@@ -589,7 +588,7 @@ angular.module('ngAnimate', ['ng'])
          * @function
          *
          * @param {boolean=} value If provided then set the animation on or off.
-         * @param {jQuery/jqLite element=} element If provided then the element will be used to represent the enable/disable operation
+         * @param {DOMElement=} element If provided then the element will be used to represent the enable/disable operation
          * @return {boolean} Current animation state.
          *
          * @description
@@ -770,6 +769,27 @@ angular.module('ngAnimate', ['ng'])
           return;
         }
 
+        if(animationEvent == 'leave') {
+          //there's no need to ever remove the listener since the element
+          //will be removed (destroyed) after the leave animation ends or
+          //is cancelled midway
+          element.one('$destroy', function(e) {
+            var element = angular.element(this);
+            var state = element.data(NG_ANIMATE_STATE) || {};
+            var activeLeaveAnimation = state.active['ng-leave'];
+            if(activeLeaveAnimation) {
+              var animations = activeLeaveAnimation.animations;
+
+              //if the before animation is completed then the element will be
+              //removed shortly after so there is no need to cancel the animation
+              if(!animations[0].beforeComplete) {
+                cancelAnimations(animations);
+                cleanup(element, 'ng-leave');
+              }
+            }
+          });
+        }
+
         //the ng-animate class does nothing, but it's here to allow for
         //parent animations to find and cancel child animations when needed
         element.addClass(NG_ANIMATE_CLASS_NAME);
@@ -927,16 +947,21 @@ angular.module('ngAnimate', ['ng'])
 
       function cancelChildAnimations(element) {
         var node = extractElementNode(element);
-        forEach(node.querySelectorAll('.' + NG_ANIMATE_CLASS_NAME), function(element) {
-          element = angular.element(element);
-          var data = element.data(NG_ANIMATE_STATE);
-          if(data && data.active) {
-            angular.forEach(data.active, function(operation) {
-              (operation.done || noop)(true);
-              cancelAnimations(operation.animations);
-            });
-          }
-        });
+        if (node) {
+          var nodes = angular.isFunction(node.getElementsByClassName) ?
+            node.getElementsByClassName(NG_ANIMATE_CLASS_NAME) :
+            node.querySelectorAll('.' + NG_ANIMATE_CLASS_NAME);
+          forEach(nodes, function(element) {
+            element = angular.element(element);
+            var data = element.data(NG_ANIMATE_STATE);
+            if(data && data.active) {
+              angular.forEach(data.active, function(operation) {
+                (operation.done || noop)(true);
+                cancelAnimations(operation.animations);
+              });
+            }
+          });
+        }
       }
 
       function cancelAnimations(animations) {
@@ -1069,16 +1094,21 @@ angular.module('ngAnimate', ['ng'])
       var closingTimestamp = 0;
       var animationElementQueue = [];
       function animationCloseHandler(element, totalTime) {
+        var node = extractElementNode(element);
+        element = angular.element(node);
+
+        //this item will be garbage collected by the closing
+        //animation timeout
+        animationElementQueue.push(element);
+
+        //but it may not need to cancel out the existing timeout
+        //if the timestamp is less than the previous one
         var futureTimestamp = Date.now() + (totalTime * 1000);
         if(futureTimestamp <= closingTimestamp) {
           return;
         }
 
         $timeout.cancel(closingTimer);
-
-        var node = extractElementNode(element);
-        element = angular.element(node);
-        animationElementQueue.push(element);
 
         closingTimestamp = futureTimestamp;
         closingTimer = $timeout(function() {
@@ -1227,7 +1257,14 @@ angular.module('ngAnimate', ['ng'])
         if(transitionDuration > 0) {
           blockTransitions(element, className, isCurrentlyAnimating);
         }
-        if(animationDuration > 0) {
+
+        //staggering keyframe animations work by adjusting the `animation-delay` CSS property
+        //on the given element, however, the delay value can only calculated after the reflow
+        //since by that time $animate knows how many elements are being animated. Therefore,
+        //until the reflow occurs the element needs to be blocked (where the keyframe animation
+        //is set to `none 0s`). This blocking mechanism should only be set for when a stagger
+        //animation is detected and when the element item index is greater than 0.
+        if(animationDuration > 0 && stagger.animationDelay > 0 && stagger.animationDuration === 0) {
           blockKeyframeAnimations(element);
         }
 
